@@ -1,0 +1,228 @@
+{% extends 'student/person_base.html' %}
+{% load static %}
+{% block person_css %}
+    <link rel="stylesheet" href="{% static 'lib/layui/css/layui.css' %}">
+{% endblock %}
+{% block person_content %}
+    <div id="mbxc">
+        <div id="messbox" class="mainR fl relative ng-scope" ng-include="'/pages/account/listmessage/list_all.html'"
+             ng-controller="MessageListCtrl">
+            <ul class="nav-tab-a clearfix ng-scope">
+                <li class="act">个人信息</li>
+            </ul>
+            <div class="tab-content ng-scope">
+                <div class="layui-fluid">
+                    <div class="layui-row">
+                        <form class="layui-form" method="post" enctype="multipart/form-data" id="user_admin_add_form">
+                            {% csrf_token %}
+                            <div class="layui-form-item">
+                              <label for="phone" class="layui-form-label">
+                                  <span class="x-red"></span>学号
+                              </label>
+                              <div class="layui-form-mid layui-word-aux">
+                                  {{ stu.stu_no }}
+                              </div>
+                          </div>
+                          <div class="layui-form-item">
+                              <label for="username" class="layui-form-label">
+                                  <span class="x-red"></span>姓名
+                              </label>
+                              <div class="layui-form-mid layui-word-aux">
+                                  {{ stu.stu_name }}
+                              </div>
+                          </div>
+                          <div class="layui-form-item">
+                              <label for="L_pass" class="layui-form-label">
+                                  <span style="color: red;">*</span>密码
+                              </label>
+                              <div class="layui-input-inline">
+                                  <input type="password" id="L_pass" name="stu_pwd" required="" lay-verify="pass" value="{{ stu.stu_pwd }}"
+                                  autocomplete="off" class="layui-input">
+                              </div>
+                              <div class="layui-form-mid layui-word-aux">
+                                  6到16个字符
+                              </div>
+                          </div>
+                          <div class="layui-form-item">
+                              <label for="L_repass" class="layui-form-label">
+                                  <span style="color: red;">*</span>确认密码
+                              </label>
+                              <div class="layui-input-inline">
+                                  <input type="password" id="L_repass" name="repass" required="" lay-verify="repass" value="{{ stu.stu_pwd }}"
+                                  autocomplete="off" class="layui-input">
+                              </div>
+                          </div>
+                        <div class="layui-form-item">
+                              <label for="username" class="layui-form-label">
+                                  <span style="color: red;">*</span>电话
+                              </label>
+                                <div class="layui-input-inline">
+                                  <input type="tel" name="stu_tel" required="" lay-verify="required|phone" value="{{ stu.stu_tel }}"
+                                  autocomplete="off" class="layui-input">
+                              </div>
+                          </div>
+                            <div class="layui-form-item">
+                              <label for="email" class="layui-form-label">
+                                  <span style="color: red;">*</span>邮箱
+                              </label>
+                                <div class="layui-input-inline">
+                                  <input type="text" name="stu_email" required="" lay-verify="email" value="{{ stu.stu_email }}"
+                                  autocomplete="off" class="layui-input">
+                              </div>
+                          </div>
+                            <div class="layui-form-item">
+                              <label for="username" class="layui-form-label">
+                                  <span class="x-red"></span>专业
+                              </label>
+                              <div class="layui-form-mid layui-word-aux">
+                                  {{ stu.stu_major }}
+                              </div>
+                          </div>
+                            <div class="layui-form-item">
+                              <label for="username" class="layui-form-label">
+                                  <span class="x-red"></span>学院
+                              </label>
+                              <div class="layui-form-mid layui-word-aux">
+                                  {{ stu.stu_depart }}
+                              </div>
+                          </div>
+                          <div class="layui-form-item">
+                            <label class="layui-form-label">上传头像</label>
+                            <div class="layui-input-inline">
+                                <div class="layui-upload">
+                                    <input type="hidden" name="stu_avator" value="{{ stu.stu_avator }}" id="logo">
+                                    <div class="layui-upload-list">
+                                        <img class="layui-upload-img" id="demo1" width="80px" height="80px" src="/static{{ stu.stu_avator }}">
+                                        <p id="demoText"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                          <div class="layui-form-item">
+                              <label for="L_repass" class="layui-form-label">
+                              </label>
+                              <button  class="layui-btn" lay-filter="add" lay-submit="">
+                                  更新
+                              </button>
+                          </div>
+                            <input type="hidden" name="stu_id" value="{{ stu.stu_id }}">
+                      </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+{% block person_js %}
+    <script type="text/javascript" src="{% static 'lib/layui/layui.js' %}"></script>
+    <script>
+        var myVarate;
+        if('{{ stu.stu_id }}' == '' || '{{ stu.stu_avator }}' == 'None' || '{{ stu.stu_avator }}' == '')
+            myVarate = '/static/images/default_avator.jpg';
+        else
+            myVarate = '/static{{ stu.stu_avator }}';
+
+        layui.use(['form', 'layer', 'upload'],
+        function() {
+            var $ = layui.jquery;
+            var form = layui.form,
+            layer = layui.layer,
+            upload = layui.upload,
+             demoText = $('#demoText');
+
+            $(function () {
+                if($("#leftbar_mydasai").hasClass('active'))
+                    $("#leftbar_mydasai").removeClass('active')
+                if($("#leftbar_myscores").hasClass('active'))
+                    $("#leftbar_myscores").removeClass('active')
+                $("#leftbar_myaccount").addClass('active')
+            })
+
+            $('#demo1').attr('src', myVarate);//页面初始化的时候渲染图片
+            //普通图片上传
+            var uploadInst = upload.render({
+                elem: '#demo1',
+                url: '/user/upload',//这里填写你的上传地址
+                accept: 'images',
+                method: 'post',
+                data: {
+                    'csrfmiddlewaretoken': function () {
+                        return $('input[name="csrfmiddlewaretoken"]').val()
+                    },
+                    'fpath': '/user/avator/student'
+                }
+                , acceptMime: 'image/*'
+                , before: function (obj) {
+                    /*如果您不想用上面的URL 进行上传,也可以在这里,添加你的上传方式*/
+                    obj.preview(function (index, file, result) {
+                        $('#demo1').attr('src', result);//图片链接（base64）
+                    });
+                }, done: function (res) {
+                    if (res.code == 6) {//长传成功(具体返回code 看后台是怎么处理的)
+                        $('#logo').val(res.url)
+                        $('#demo1').attr('src', '/static' + res.url);
+                        demoText.html('')
+                    } else {
+                        demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                    }
+                    layer.msg(res.msg);
+                }, error: function () {
+                    demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                }
+            });
+            //上传失败监听重试按钮的操作
+            $(document).on('click',".demo-reload",function(){
+                uploadInst.upload();
+            })
+
+            //自定义验证规则
+            form.verify({
+                nikename: function(value) {
+                    if (value.length < 5) {
+                        return '昵称至少得5个字符啊';
+                    }
+                },
+                pass: [/(.+){6,12}$/, '密码必须6到12位'],
+                repass: function(value) {
+                    if ($('#L_pass').val() != $('#L_repass').val()) {
+                        return '两次密码不一致';
+                    }
+                }
+            });
+
+            //监听提交
+            form.on('submit(add)',
+            function(data) {
+                var data = $('#user_admin_add_form').serialize()
+                $.ajax({
+                    url: '/user/add/2/',
+                    data: data,
+                    dataType: "json",
+                    type: "POST",
+                    success: function (result) {
+                        if (result.code === 6) {
+                        layer.alert(result.msg, {
+                                icon: result.code
+                            },
+                            function() {
+                                parent.location.reload(true);
+                                // 获得frame索引
+                                var index = parent.layer.getFrameIndex(window.name);
+                                console.log(index)
+                                //关闭当前frame
+                                parent.layer.close(index);
+                            });
+                        } else {
+                            layer.alert(result.msg, {
+                                icon: result.code
+                            });
+                        }
+                    }
+                });
+                return false;
+            });
+
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,514 @@
+import datetime
+import os
+import re
+
+from django.core import serializers
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.shortcuts import render, redirect, HttpResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import View
+from django.http import HttpResponseRedirect
+
+from TiantiMS import settings
+from userms.models import Admin, Student
+from contestms.models import Contest, Sign
+from django.http import JsonResponse
+from django.views.decorators.clickjacking import xframe_options_sameorigin
+import json
+
+# Create your views here.
+class Admin_LoginView(View):
+
+    def get(self, request):
+        return render(request, 'admin/user/login.html')
+
+    def post(self, request):
+        admin_account = request.POST.get('admin_account')
+        admin_pwd = request.POST.get('admin_pwd')
+        next = request.POST.get('next')
+        user=Admin.objects.filter(admin_account=admin_account,admin_pwd=admin_pwd)
+        if user:
+            admin = user[0]
+            admin_dict = {'admin_id': admin.admin_id, 'admin_role': admin.admin_role, 'admin_account': admin.admin_account, 'admin_name': admin.admin_name,
+                   'admin_avator': admin.admin_avator, 'admin_logtime': admin.admin_logtime.strftime('%Y-%m-%d %H:%M:%S')}
+            request.session['is_login'] = admin.admin_role  # 这个session是用于后面访问每个页面（即调用每个视图函数时要用到，即判断是否已经登录，用此判断）
+            request.session['login_user'] = admin_dict
+            admin.admin_logtime = datetime.datetime.now()
+            admin.save()
+            if next:
+                return HttpResponseRedirect(next)
+            return HttpResponseRedirect('/admin/index')
+        return render(request, 'admin/user/login.html', {'err_msg': '账号或密码错误！'})
+
+# Create your views here.
+class Stu_LoginView(View):
+
+    def get(self, request):
+        return render(request, 'student/login.html')
+
+    def post(self, request):
+        stu_no = request.POST.get('stu_no')
+        stu_pwd = request.POST.get('stu_pwd')
+        next = request.POST.get('next')
+        user=Student.objects.filter(stu_no=stu_no,stu_pwd=stu_pwd)
+        if user and len(user) > 0:
+            stu = user[0]
+            stu = {'stu_id': stu.stu_id, 'stu_name': stu.stu_name, 'stu_tel': stu.stu_tel, 'stu_email': stu.stu_email,
+                   'stu_major': stu.stu_major, 'stu_depart': stu.stu_depart, 'stu_no': stu.stu_no,
+                   'stu_avator': stu.stu_avator}
+            request.session['is_login'] = 3  # 这个session是用于后面访问每个页面（即调用每个视图函数时要用到，即判断是否已经登录，用此判断）
+            request.session['login_user'] = stu
+            if next:
+                return HttpResponseRedirect(next)
+            return HttpResponseRedirect('/')
+        return render(request, 'student/login.html', {'err_msg': '账号或密码错误！'})
+
+class Stu_IndexView(View):
+
+    def get(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login != 3:
+            return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
+        login_user_sess = request.session.get('login_user')
+        if login_user_sess:
+            login_id = login_user_sess['stu_id']
+            try:
+                login_user = Student.objects.get(stu_id=login_id)
+            except Exception as ex:
+                print('查询异常')
+                print(ex)
+                return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
+            pIndex = request.GET.get('cpage')
+            res = Contest.objects.filter().order_by('con_time')
+            paginator = Paginator(res, 8)
+            try:
+                # page对象
+                list_page = paginator.page(pIndex)
+            except PageNotAnInteger:
+                list_page = paginator.page(1)
+            except EmptyPage:
+                list_page = paginator.page(paginator.num_pages)
+            p = Paginator(res, 10)
+            if not pIndex:
+                pIndex = '1'
+            pIndex = int(pIndex)
+
+            totol_page = p.page_range
+            rep_data = {
+                'res': list_page,
+                'tpage': len(totol_page),
+                'cpage': pIndex,
+                'login_user': login_user
+            }
+            return render(request, 'student/index.html', rep_data)
+        return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
+
+    def post(self, request):
+        pass
+
+class Admin_IndexView(View):
+
+    def get(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login == 3:
+            return render(request, 'admin/user/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/admin/index'})
+        login_user_sess = request.session.get('login_user')
+        print(is_login, login_user_sess)
+        if login_user_sess:
+            login_id = login_user_sess['admin_id']
+            try:
+                login_user = Admin.objects.get(admin_id=login_id)
+                return render(request, 'admin/index.html', {'login_user': login_user})
+            except Exception as ex:
+                print('查询异常')
+        return render(request, 'admin/user/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/admin/index'})
+
+
+    def post(self, request):
+        pass
+
+class WelcomeView(View):
+
+    @xframe_options_sameorigin
+    def get(self, request):
+        return render(request, 'admin/welcome.html')
+
+    def post(self, request):
+        pass
+
+class LogoutView(View):
+
+    def get(self, request):
+        is_login = request.session.get('is_login')
+        target = 'student/login.html'
+        if is_login == 2 or is_login == 1:
+            target = 'admin/user/login.html'
+        request.session['is_login'] = 0  # 这个session是用于后面访问每个页面（即调用每个视图函数时要用到，即判断是否已经登录，用此判断）
+        request.session['login_user'] = ''
+        return render(request, target, {'err_msg': '注销成功！'})
+
+    def post(self, request):
+        pass
+
+
+class ListView(View):
+
+    @xframe_options_sameorigin
+    def get(self, request, role):
+        """
+        :param request:
+        :param type: 查询的角色类别：1为管理员，2为学生
+        :return:
+        """
+        pIndex = request.GET.get('cpage')
+        search_dict = dict()
+        # 如果有这个值 就写入到字典中去
+        target = 'admin/user/admin_list.html'
+        if role == '1':
+            res = Admin.objects.filter().order_by('admin_id')
+        else:
+            res = Student.objects.filter().order_by('stu_id')
+            target = 'admin/user/stu_list.html'
+
+        paginator = Paginator(res, 10)
+        if not pIndex:
+            pIndex = '1'
+        pIndex = int(pIndex)
+        try:
+            # page对象
+            list_page = paginator.page(pIndex)
+        except PageNotAnInteger:
+            list_page = paginator.page(1)
+        except EmptyPage:
+            list_page = paginator.page(paginator.num_pages)
+        p = Paginator(res, 10)
+        totol_page = p.page_range
+        rep_data = {
+            'res': list_page,
+            'tpage': len(totol_page),
+            'cpage': pIndex
+            # 'filt': {
+            #     'con_level': con_level,
+            #     'con_id': con_id,
+            #     'start': start,
+            #     'end': end
+            # }
+        }
+        return render(request, target, rep_data)
+
+    def post(self, request):
+        pass
+
+
+class AddView(View):
+
+    @xframe_options_sameorigin
+    def get(self, request, role):
+        user_id = request.GET.get('user_id')
+        user = None
+        if role == '1':
+            if user_id:
+                try:
+                    user = Admin.objects.get(admin_id=user_id)
+                except Exception as ex:
+                    print(ex)
+            return render(request, 'admin/user/admin_add.html', {'user': user})
+        else:
+            if user_id:
+                try:
+                    user = Student.objects.get(stu_id=user_id)
+                except Exception as ex:
+                    print(ex)
+            return render(request, 'admin/user/stu_add.html', {'user': user})
+
+    @xframe_options_sameorigin
+    def post(self, request, role):
+        if role == '1':
+            admin_account = request.POST.get('admin_account')
+            admin_name = request.POST.get('admin_name')
+            admin_pwd = request.POST.get('admin_pwd')
+            admin_role = request.POST.get('admin_role')
+            admin_avator = request.POST.get('admin_avator')
+            admin_id = request.POST.get("admin_id")
+            admin = None
+            if admin_id:
+                try:
+                    admin = Admin.objects.get(admin_id=admin_id)
+                    msg = '更新成功'
+                except Exception as ex:
+                    print(ex)
+                    msg = '更新失败，暂无此管理员信息'
+            else:
+                admin = Admin()
+                admin.admin_logtime = datetime.datetime.now()
+                msg = '添加成功'
+            if admin_pwd:
+                admin.admin_pwd = admin_pwd
+            admin.admin_role = admin_role
+            admin.admin_name = admin_name
+            admin.admin_avator = admin_avator
+            admin.admin_account = admin_account
+            admin.save()
+            res_data = {"code": 6, "msg": msg}
+        else:
+            stu_no = request.POST.get('stu_no')
+            stu_name = request.POST.get('stu_name')
+            stu_pwd = request.POST.get('stu_pwd')
+            stu_depart = request.POST.get('stu_depart')
+            stu_major = request.POST.get('stu_major')
+            stu_tel = request.POST.get("stu_tel")
+            stu_email = request.POST.get("stu_email")
+            stu_avator = request.POST.get("stu_avator")
+            stu_id = request.POST.get("stu_id")
+            stu = Student()
+            if stu_id:
+                try:
+                    stu = Student.objects.get(stu_id=stu_id)
+                    msg = '更新成功'
+                except Exception as ex:
+                    print(ex)
+                    msg = '更新失败，暂无此管理员信息'
+            else:
+                msg = '添加成功'
+            if stu_pwd:
+                stu.stu_pwd = stu_pwd
+            if stu_no:
+                stu.stu_no = stu_no
+            if stu_name:
+                stu.stu_name = stu_name
+            if stu_avator:
+                stu.stu_avator = stu_avator
+            if stu_depart:
+                stu.stu_depart = stu_depart
+            if stu_major:
+                stu.stu_major = stu_major
+            if stu_tel:
+                stu.stu_tel = stu_tel
+            if stu_email:
+                stu.stu_email = stu_email
+            stu.save()
+            res_data = {"code": 6, "msg": msg}
+        return JsonResponse(res_data)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UploadAvatorView(View):
+
+    @xframe_options_sameorigin
+    def get(self, request):
+        return render(request, 'admin/user/admin_add.html')
+
+    @csrf_exempt
+    def post(self, request):
+        """
+        头像上传(管理员和学生)
+        证书上传
+        layui富文本编辑器 图片上传
+        :param request:
+        :return:
+        """
+        code = 2
+        msg = '上传失败'
+        url = ''
+        pre = ''
+        flag = False
+
+        file = request.FILES.get('file')
+        fpath = request.POST.get('fpath')
+        print(fpath)
+        if not fpath:
+            flag = True
+            fpath = '/temp/%s'%os.path.splitext(file.name)[1][1:]
+            pre = '/static'
+        rand_name = 'temp_%s' % (datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[0:17])
+        file_path = '%s/%s' % (settings.UPLOAD_ROOT, fpath)
+        file_full_path = '%s/%s%s'%(file_path, rand_name, os.path.splitext(file.name)[1])
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+        try:
+            if file is None:
+                code = 2
+                msg = '请选择文件后再上传！'
+            # 循环二进制写入
+            with open(file_full_path, 'wb') as f:
+                for i in file.readlines():
+                    f.write(i)
+            code = 6
+            msg = '上传成功'
+            url='/upload%s/%s%s'%(fpath, rand_name, os.path.splitext(file.name)[1])
+            # url='/upload/%s'%(cur_str, rand_name, os.path.splitext(file.name)[1])
+        except Exception as e:
+            print(e)
+            msg = '上传失败'
+        if flag:
+            code = 0
+        res_data = {
+            "code": code,
+            "msg": msg,
+            'url': url,
+            "data": {
+                "src": pre+url
+                , "title": "%s%s"%(rand_name, os.path.splitext(file.name)[1])
+            }
+        }
+        return JsonResponse(res_data)
+
+
+class ResetpwdView(View):
+
+    def get(self, request, role):
+        pass
+
+    def post(self, request, role):
+        user_id = request.POST.get('user_id')
+        try:
+            if role == '1':
+                user = Admin.objects.get(admin_id=user_id)
+                user.admin_pwd = '123456'
+            else:
+                user = Student.objects.get(stu_id=user_id)
+                user.stu_pwd = '123456'
+            user.save()
+            res_data = {"code": 6, "msg": "密码重置成功，重置后的密码为:123456"}
+        except Exception as ex:
+            print(ex)
+            res_data = {"code": 2, "msg": "密码重置失败"}
+        return JsonResponse(res_data)
+
+
+class Admin_PersonView(View):
+
+    @xframe_options_sameorigin
+    def get(self, request):
+        login_id = request.session.get('login_user')['admin_id']
+        try:
+            login_user = Admin.objects.get(admin_id=login_id)
+            return render(request, 'admin/user/admin_person.html', {'user': login_user})
+        except Exception as ex:
+            print(ex)
+        return render(request, 'admin/user/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/user/person'})
+
+    @xframe_options_sameorigin
+    def post(self, request):
+        pass
+
+
+class Stu_Query_PersonView(View):
+
+    def get(self, request):
+        user_id = request.GET.get('user_id')
+        try:
+            stu = Student.objects.get(stu_no=user_id)
+            stu = {'stu_id': stu.stu_id, 'stu_name': stu.stu_name, 'stu_tel': stu.stu_tel, 'stu_email': stu.stu_email,
+                   'stu_major': stu.stu_major, 'stu_depart': stu.stu_depart, 'stu_no': stu.stu_no,
+                   'stu_avator': stu.stu_avator}
+            res_data = {"code": 6, "msg": "查询成功", 'stu': stu}
+        except Exception as ex:
+            print(ex)
+            res_data = {"code": 2, "msg": "查询失败,暂无此学号信息", 'stu':''}
+        return JsonResponse(res_data)
+
+    def post(self, request):
+        pass
+
+
+class DelView(View):
+
+    def get(self, request, role):
+        pass
+
+    def post(self, request, role):
+        user_id = request.POST.get('user_id')
+        file_path = '%s\\user\\avator' % settings.UPLOAD_ROOT
+        try:
+            if role == '1':
+                user = Admin.objects.get(admin_id=user_id)
+                file_full_path = '%s\\admin\\%s' % (file_path, user.admin_avator.split('/')[-1])
+                if user.admin_avator and user.admin_avator.split('/')[-1] != 'default_avator.jpg' and os.path.exists(
+                        file_full_path):
+                    os.remove(file_full_path)
+            else:
+                user = Student.objects.get(stu_id=user_id)
+                file_full_path = '%s\\student\\%s' % (file_path, user.stu_avator.split('/')[-1])
+                if user.stu_avator and user.stu_avator.split('/')[-1] != 'default_avator.jpg' and os.path.exists(file_full_path):
+                    os.remove(file_full_path)
+            user.delete()
+            res_data = {"code": 6, "msg": "删除成功"}
+            return JsonResponse(res_data)
+        except Exception as ex:
+            print(ex)
+        res_data = {"code": 2, "msg": "删除失败"}
+        return JsonResponse(res_data)
+
+# 学生个人主页
+class Stu_PersonView(View):
+
+    def get(self, request, sid):
+        login_user = request.session.get('login_user')
+        is_login = request.session.get('is_login')
+        if not login_user or not is_login:
+            return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/user/student/%s/'%sid})
+        stu = Student.objects.get(stu_id=login_user['stu_id'])
+        con_sign = Sign.objects.filter(sign_stuid=stu)
+        cons = list()
+        pIndex = request.session.get('pIndex')
+        for cs in con_sign:
+            try:
+                con_item = Contest.objects.get(con_id=cs.sign_conid.con_id)
+                pattern = re.compile(r'<[^>]+>', re.S)
+                con_rule_re = pattern.sub('', con_item.con_rule)
+                con_item.con_rule = con_rule_re
+                cons.append(con_item)
+            except Exception as ex:
+                print(ex)
+
+        paginator = Paginator(cons, 10)
+        try:
+            # page对象
+            list_page = paginator.page(pIndex)
+        except PageNotAnInteger:
+            list_page = paginator.page(1)
+        except EmptyPage:
+            list_page = paginator.page(paginator.num_pages)
+        if not pIndex:
+            pIndex = '1'
+        pIndex = int(pIndex)
+
+        totol_page = paginator.page_range
+        rep_data = {
+            'cons': list_page,
+            'tpage': len(totol_page),
+            'cpage': pIndex,
+        }
+        return render(request, 'student/person_base.html', rep_data)
+
+    def post(self, request):
+        pass
+
+
+class Stu_InfoView(View):
+
+    def get(self, request):
+        login_user = request.session.get('login_user')
+        is_login = request.session.get('is_login')
+        if not login_user or not is_login:
+            return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/user/stu_info'})
+        try:
+            stu = Student.objects.get(stu_id=login_user['stu_id'])
+        except Exception as ex:
+            print(ex)
+            return render(request, 'student/login.html', {'err_msg': '暂无查到此账户信息，请重新登录！', 'next': '/user/stu_info'})
+        return render(request, 'student/person_account.html', {'stu': stu})
+
+    def post(self, request):
+        pass
+
+
+# 404
+def page_not_found(request, exception):  # 注意点 ①
+    return render(request, '404.html')
+
+# 500
+def page_error(request):
+    return render(request, '500.html')

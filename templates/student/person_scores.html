@@ -1,0 +1,110 @@
+{% extends 'student/person_base.html' %}
+{% load static %}
+{% block person_css %}
+    <link rel="stylesheet" href="{% static 'lib/layui/css/layui.css' %}">
+{% endblock %}
+{% block person_content %}
+    <div id="mbxc">
+        <div class="divR fl relative">
+                        <ul class="nav-tab-a clearfix">
+                            <li class="act" data-val="1">获奖查询</li>
+                        </ul>
+                        <div class="tab-content lq-award-result">
+                            <!-- <p class="font-s14">感谢您参加蓝桥杯大赛，请选择您要查询的比赛类型。</p>  -->
+                            <div class="mt20">
+                                <label class="font-s14">竞赛选择</label>
+                                <select id="periodIdSel" class="select ml10" style="width:200px;">
+                                    <option value="">请选择要查询的竞赛</option>
+                                    {% for con in cons %}
+                                        <option value="{{ con.con_id }}">{{ con.con_name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                            </div>
+
+                            <div class="lq-soft">
+							<!-- 比赛结果 -->
+                                <div class="showMain layui-hide" id="score_card">
+                                    <p><span>姓名： </span><span id="s_name">{{ request.session.login_user.stu_name }}</span></p>
+                                    <p><span>成绩：</span><span id="s_score"></span></p>
+                                    <p><span>等级：</span><span id="s_level"></span></p>
+                                    <p><span>指导教师：</span><span id="s_teach"></span></p>
+                                    <p><span>答题详情：</span><div style="padding: 0px 10px 10px 105px; line-height: 50px;" id="s_detial"></div></p>
+                                    <p><span>荣誉证书：</span><span id="s_cert_tip"></span></p>
+                                    <p class="layui-hide" id="cert_p">
+                                        <img src="" width="80%" id="s_cert_img">
+                                        <div>
+                                        <a href="" id="cert_download">
+                                                <button type="button" class="layui-btn"><i class="layui-icon layui-icon-download-circle"></i></button>
+                                             </a>
+                                        </div>
+                                    </p>
+                                </div>
+
+                                <div id="arecordlist">
+                                    <div class="lq-soft">
+                                        <p class="nodata c-green">暂无查询到成绩信息~</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+        </div>
+    </div>
+{% endblock %}
+{% block person_js %}
+    <script type="text/javascript" src="{% static 'lib/layui/layui.js' %}"></script>
+    <script>
+        layui.use(['form', 'layer', 'upload'],
+        function() {
+            var $ = layui.jquery;
+            $(function () {
+                if($("#leftbar_mydasai").hasClass('active'))
+                    $("#leftbar_mydasai").removeClass('active')
+                if($("#leftbar_myaccount").hasClass('active'))
+                    $("#leftbar_myaccount").removeClass('active')
+                $("#leftbar_myscores").addClass('active')
+            })
+            $('#periodIdSel').change(function () {
+                var cid = $(this).val()
+                if(cid != ''){
+                    $.ajax({
+                    url: '/contest/sign/score/'+cid+'/',
+                    dataType: "json",
+                    type: "GET",
+                    {#async: false,#}
+                    success: function (result) {
+                        if(result.code == 6){
+                            $("#s_score").html(result.data.score)
+                            $("#s_level").html(result.data.level)
+                            $("#s_teach").html(result.data.teach)
+                            $("#s_detial").html(result.data.detial)
+                            if(result.data.sign_certpath != ''){
+                                $("#s_cert_img").attr('src', '/static'+result.data.sign_certpath);
+                                $("#cert_download").attr('href', '/contest/sign/download/'+result.data.sign_id+'/');
+                                $("#cert_p").removeClass('layui-hide');
+                                $("#cert_download").removeClass('layui-hide');
+                                $("#s_cert_tip").html('');
+                            }else{
+                                $("#s_cert_img").attr('src', '')
+                                $("#cert_p").addClass('layui-hide');
+                                $("#cert_download").addClass('layui-hide');
+                                $("#s_cert_tip").html('证书暂未生成');
+                            }
+                            $("#score_card").removeClass('layui-hide')
+                            $("#arecordlist").addClass('layui-hide')
+                        }
+                        layui.layer.msg(result.msg, {
+                            icon: result.code,
+                            time: 3000
+                        });
+                    }
+                });
+                }else{
+                     $("#arecordlist").removeClass('layui-hide')
+                     $("#score_card").addClass('layui-hide')
+                }
+            });
+        });
+    </script>
+{% endblock %}

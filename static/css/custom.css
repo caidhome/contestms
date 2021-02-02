@@ -1,0 +1,8 @@
+.cus_con_table{
+     table-layout: fixed;
+}
+.cus_con_table .cus_con_td{
+     white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}

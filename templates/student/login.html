@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>兰州理工大学天梯赛-学生登录</title>
+    <link rel="stylesheet" href="{% static 'lib/layui/css/layui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body{
+            background: #333;
+            overflow-y: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="login">
+        <div class="header">
+            <div class="headerRight">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <div class="loginBody">
+            <h1>SeeDream Admin</h1>
+            <form method="post" action="/user/login" id="stu_log_form">
+                {% csrf_token %}
+                <div class="layui-container">
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe612;</i>
+                        <div class="input">
+                            <input type="text" placeholder="账户" name="stu_no">
+                        </div>
+                    </div>
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe64c;</i>
+                        <div class="input">
+                            <input type="password" placeholder="密码" name="stu_pwd">
+                        </div>
+                    </div>
+                </div>
+                <div style="color: red; padding-left: 25px;" id="err_msg">{{ err_msg }}</div>
+                <input type="hidden" name="next" value="{{ next }}">
+            </form>
+        </div>
+        <div class="footer" id="sub_btn">
+            <h1>登录</h1>
+        </div>
+    </div>
+
+    
+
+    <script src="{% static 'lib/layui/layui.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+    <script>
+        layui.use('form', function(){
+              var form = layui.form;
+              var $ = layui.jquery;
+              $("input[name='stu_no']").click(function () {
+                  $("#err_msg").text('')
+              })
+              $("#sub_btn").click(function () {
+                  var name = $("input[name='stu_no']").val()
+                  var pwd = $("input[name='stu_pwd']").val()
+                  if(name.length <= 0 || pwd.length <= 0)
+                        layui.layer.alert('您输入的数据不符合要求！')
+                  else
+                        $("#stu_log_form").submit()
+              })
+        });
+
+    </script>
+</body>
+</html>

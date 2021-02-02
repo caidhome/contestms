@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>兰州理工大学天梯赛-报名页面</title>
+    <script src="{% static 'lib/layui/layui.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/layui/css/layui.css' %}">
+
+        <style>
+        .c_time_1 li, .c_time_2 li {
+            display: inline-block;
+            font-size: 14px;
+            line-height: 30px;
+            color: #333;
+            text-align: center;
+            margin-left: 6%;
+            margin-right: 9.5%;
+        }
+
+        .c_time_2 li {
+            color: #7b838d;
+            margin-left: 0;
+            margin-right: 4%;
+            line-height: 50px;
+        }
+
+        .c_time_2 li:nth-child(2) {
+            margin-right: 2%;
+        }
+
+        .c_time_2 li:last-child {
+            margin-right: 0;
+        }
+
+        #steps {
+            padding: 1px 151px;
+            background: #fff;
+        }
+
+        .step-item {
+            display: inline-block;
+            line-height: 26px;
+            position: relative;
+            background: #ffffff;
+        }
+
+        .step-item-tail {
+            width: 100%;
+            padding: 0 10px;
+            position: absolute;
+            left: 0;
+            top: 13px;
+        }
+
+        .step-item-tail i {
+            display: inline-block;
+            width: 100%;
+            height: 1px;
+            vertical-align: top;
+            background: #c2c2c2;
+            position: relative;
+        }
+        .step-item-tail-done {
+            background: #009688 !important;
+        }
+
+        .step-item-head {
+            position: relative;
+            display: inline-block;
+            height: 26px;
+            width: 26px;
+            text-align: center;
+            vertical-align: top;
+            color: #009688;
+            border: 1px solid #009688;
+            border-radius: 50%;
+            background: #ffffff;
+        }
+
+        .step-item-head.step-item-head-active {
+            background: #009688;
+            color: #ffffff;
+        }
+
+        .step-item-main {
+            background: #ffffff;
+            display: block;
+            position: relative;
+        }
+
+        .step-item-main-title {
+            font-weight: bolder;
+            color: #555555;
+        }
+        .step-item-main-desc {
+            color: #aaaaaa;
+        }
+    </style>
+</head>
+<body>
+<iframe src="/contest/head" style="width:99%;height:75px; margin: auto;"></iframe>
+<div class="inner2" style="margin-top: 0px; padding-top: 0px; background: #fff;margin: auto;">
+    <div class="innertop">
+        <div class="line">
+            <div class="tleft tcolor1"><img src="{% static 'images/stu/bg_detial.jpeg' %}" width="489" height="276">
+                {% comment %}<span><a href="http://www.ncccu.org.cn/case1.html#cs">报名缴费</a></span>{% endcomment %}
+            </div>
+            <div class="tright">
+                <div class="ititle">赛题：{{ con.con_name }}</div>
+                <div class="ititle2">
+                    <br><br><br>
+{#                    <span>组织架构</span><br>#}
+{#                    主办单位：全国高等学校计算机教育研究会<br>#}
+{#                    承办单位：我爱竞赛网、各高校计算机相关院系<br>#}
+{#                    技术支持：兰智大数据、《软件导刊》杂志社#}
+                </div>
+                <div class="ctime">
+                    <ul class="c_time_1">
+                        <li>报名时间</li>
+                        <li>截至时间</li>
+                        <li>竞赛时间</li>
+                    </ul>
+                    <img src="{% static 'images/ctime1.png' %}" width="659">
+                    <ul class="c_time_2">
+                        <li>{{ con.con_time|date:"Y-m-d H:i:s" }}</li>
+                        <li>{{ con.con_signtime|date:"Y-m-d H:i:s" }}</li>
+                        <li>{{ con.con_endtime|date:"Y-m-d H:i:s" }}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="clear"></div>
+
+        </div>
+
+
+    </div>
+
+
+    <div id="steps"></div>
+    <div id="content_1">
+        <div style="margin-left: 122px; margin-top: 20px;">
+        <form class="layui-form" action="" id="form_1">
+            {% csrf_token %}
+           <div class="layui-form-item">
+            <label class="layui-form-label">学号</label>
+            <div class="layui-input-inline">
+              <input type="text" name="stu_id" value="{{ request.session.login_user.stu_no }}" lay-verify="pass" placeholder="请输入学号" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">请填写6到12位学号</div>
+          </div>
+          <div class="layui-form-item">
+            <div class="layui-input-block">
+              <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" id="toTwo">下一步</button>
+            </div>
+          </div>
+        </form>
+    </div>
+    </div>
+    <div id="content_2" style="display: none;">
+        <div style="margin-left: 122px; margin-top: 20px;">
+        <form class="layui-form" action="" id="form_2">
+            {% csrf_token %}
+            <div class="layui-row">
+                <div class="layui-col-xs12 layui-col-sm6 layui-col-md6">
+                  <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                  <legend>学生信息</legend>
+                </fieldset>
+               <div class="layui-form-item">
+                <label class="layui-form-label">学号:</label>
+                   <input name="stu_no" type="hidden">
+                <div class="layui-form-mid layui-word-aux" id="stu_no"></div>
+              </div>
+                <div class="layui-form-item">
+                <label class="layui-form-label">姓名:</label>
+                <div class="layui-form-mid layui-word-aux" id="stu_name"></div>
+              </div>
+                <div class="layui-form-item">
+                <label class="layui-form-label">电话:</label>
+                <div class="layui-form-mid layui-word-aux" id="stu_tel"></div>
+              </div>
+                <div class="layui-form-item">
+                <label class="layui-form-label">邮箱:</label>
+                <div class="layui-form-mid layui-word-aux" id="stu_email"></div>
+              </div>
+                <div class="layui-form-item">
+                <label class="layui-form-label">专业:</label>
+                <div class="layui-form-mid layui-word-aux" id="stu_major"></div>
+              </div>
+                <div class="layui-form-item">
+                <label class="layui-form-label">学院:</label>
+                <div class="layui-form-mid layui-word-aux" id="stu_depart"></div>
+              </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">头像</label>
+                    <div class="layui-input-inline">
+                        <div class="layui-upload">
+                            <div class="layui-upload-list">
+                                <img class="layui-upload-img" id="avator" width="120px" height="180px">
+                                <p id="demoText"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <div class="layui-col-xs12 layui-col-sm6 layui-col-md6">
+                  <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                  <legend>比赛信息</legend>
+                </fieldset>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">竞赛名称:</label>
+                    <div class="layui-form-mid layui-word-aux">{{ con.con_name }}</div>
+                  </div>
+
+                 <div class="layui-form-item">
+                      <label class="layui-form-label">参赛语言</label>
+                      <div class="layui-input-inline">
+                        <select name="sign_lang" lay-verify="required" lay-search="">
+                          <option value="">选择参赛语言</option>
+                            {% for lang in con.con_lang %}
+                            <option value="{{ lang }}">{{ lang }}</option>
+                            {% endfor %}
+                        </select>
+                      </div>
+                 </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">指导教师</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="sign_teach" placeholder="请输入指导教师" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux"></div>
+                  </div>
+                <div class="layui-form-mid layui-word-aux" style="color: red !important;">注：除电话和邮箱外，如果其他信息有误，请及时联系管理员修改。</div>
+                </div>
+            </div>
+
+
+
+              <div class="layui-form-item">
+                <div class="layui-input-block">
+                  <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" id="toTwo">确认提交</button>
+                </div>
+              </div>
+        </form>
+    </div>
+    </div>
+</div>
+
+</body>
+<script>
+    layui.config({
+        base: '{% static 'js/'%}'
+    });
+
+    layui.use(['form', 'steps'],  function () {
+        var steps = layui.steps;
+        var form = layui.form;
+        var layer = layui.layer;
+        var $ = layui.$;
+
+        var data = [
+            {'title': "输入个人信息", "desc": "请输入你的学号"},
+            {'title': "确认信息", "desc": "请查看查询结果是否正确"},
+            {'title': "完成", "desc": "完成报名"}
+            {#{'title': "第四步", "desc": "2018-07-01 10:44:42"}#}
+            ];
+
+        steps.make(data, '#steps', 0);
+
+        //自定义验证规则
+      form.verify({
+            pass: [
+              /^[\S]{6,12}$/
+              ,'学号必须6到12位，且不能出现空格'
+            ]
+            ,content: function(value){
+              layedit.sync(editIndex);
+            }
+          });
+      $('#form_1').submit(function () {
+          $.ajax({
+                url: '/user/stu_query_person',
+                data: {'user_id': $("input[name='stu_id']").val(),
+                    'csrfmiddlewaretoken': function () {
+                    return $(':input:first').val()
+                }},
+                dataType: "json",
+                type: "GET",
+                success: function (result) {
+                    if(result.code == 6){
+                        $("#content_1").hide()
+                        $("#content_2").show()
+                        $('#steps').html('')
+                        steps.make(data, '#steps', 1);
+                        $('#stu_no').html(result.stu.stu_no)
+                        $('input[name="stu_no"]').val(result.stu.stu_no)
+                        $('#stu_name').html(result.stu.stu_name)
+                        $('#stu_email').html(result.stu.stu_email)
+                        $('#stu_depart').html(result.stu.stu_depart)
+                        $('#stu_tel').html(result.stu.stu_tel)
+                        $('#stu_major').html(result.stu.stu_major)
+                        $('#avator').attr('src', '/static'+result.stu.stu_avator)
+
+                    }
+                    layer.msg(result.msg, {
+                        icon: result.code
+                    });
+                }
+            });
+          return false;
+      })
+      $("#form_2").submit(function () {
+        layer.confirm('确认提交后信息将不可再修改，您确认提交吗？',
+             function(index) {
+                $.ajax({
+                    url: '/contest/sign/{{ con.con_id }}/',
+                    data: $("#form_2").serialize(),
+                    dataType: "json",
+                    type: "POST",
+                    success: function (result) {
+                        if(result.code == 6){
+                            window.top.location.href='/contest/detial/{{ con.con_id }}/'
+                        }
+                        layer.msg(result.msg, {
+                            icon: result.code
+                        });
+                    }
+                });
+                return true;
+            });
+        return false;
+      })
+    });
+
+</script>
+</html>

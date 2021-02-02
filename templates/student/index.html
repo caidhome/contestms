@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="renderer" content="webkit">
+    <meta name="baidu-site-verification" content="pmPdczRdjp"/>
+    <meta name="keywords" content="蓝桥杯大赛——全国大学生TMT行业赛事"/>
+    <meta name="description" content=""/>
+    <title>兰州理工大学-天梯赛</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/basic.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/news.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index201708.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index20200706.css' %}"/>
+    <script src="{% static 'js/jquery-1.9.1.min.js' %}"></script>
+    <script src="{% static 'js/jquery.superslide.2.1.1.js' %}"></script>
+
+</head>
+<body>
+{% comment %}<div class="navigation-wrap">
+    <div class="head-wrap">
+        <div class="left-wrap">
+            <a class="home" href="https://www.lanqiao.cn/"></a>
+            <ul class="menu">
+                <!-- <li class="link act"><a href="">首页</a></li> -->
+                <li class="link"><a href="http://dasai.lanqiao.cn/">蓝桥杯</a></li>
+                <li class="link"><a target="_blank" href="/pages/dasai/curren_item.html">本届赛事</a></li>
+                <li class="link">
+                    <a href="">关于大赛</a>
+                    <ul>
+                        <!-- <li><a href="/pages/dasai/news.html?id=19">大赛新闻</a></li> -->
+                        <li><a href="/pages/dasai/notes.html?id=20">大赛通知</a></li>
+                        <li><a href="/pages/dasai/news_detail.html?id=614">大赛章程</a></li>
+                        <li><a href="/pages/dasai/news_detail.html?id=622">奖项设置</a></li>
+                        <li><a href="/pages/dasai/news_detail.html?id=623">竞赛科目</a></li>
+                        <!-- <li><a href="/pages/dasai/news_detail.html?id=624">赛事日程</a></li>
+                        <li><a href="/pages/dasai/news_detail.html?id=625">本届通知</a></li>
+                        !--<li><a href="/pages/dasai/news_detail.html?id=636">团队赛通知</a></li>-->
+                        <li><a href="/pages/dasai/news_detail.html?id=624">比赛大纲</a></li>
+                        <li><a href="/pages/dasai/news_detail.html?id=650">获奖名单</a></li>
+                        <li><a href="/pages/dasai/notes.html?id=51">赛点名单</a></li>
+                    </ul>
+                </li>
+                <li class="link">
+                    <a href="">学习资料</a>
+                    <ul class="text-center"
+                        style="   /* width: 120px;*/    text-align: center;   /* padding-left: 20px;*/">
+
+                        <li><a href="https://www.lanqiao.cn/courses/2786">历届真题</a></li>
+                        <li><a href="https://www.lanqiao.cn/paths/38/">真题解析</a></li>
+                        <li><a href="/pages/dasai/news_detail_w.html?id=1819">资料文档</a></li>
+                        <li><a href="https://www.lanqiao.cn/courses/">实战课程</a></li>
+                        <li><a href="http://lx.lanqiao.cn/">练习系统</a></li>
+                    </ul>
+                </li>
+
+                <li class="link">
+                    <a target="_blank"
+                       href="https://www.lanqiao.cn/questions/?topic_id=20&amp;pft=1&amp;sub_topic_id=21">交流讨论
+                        <span class="beizt"></span>
+                    </a>
+                </li>
+                <li class="link"><a href="/pages/dasai/tell_ours.html">联系我们</a></li>
+                <li class="link"><a href="http://www.lanqiaobei.cn/">ENGLISH</a></li>
+            </ul>
+        </div>
+        <div class="right-wrap">
+            <ul class="ent-wrap">
+
+                <li class="user" id="login_logined" style="">
+                    <div class="head">
+                        <div class="bell-wrap">
+                            <a href="/pages/account/message.html">
+                                <img class="bell" src="https://static.lanqiao.cn/dasai/images/20200706/bell.png">
+                                <span class="num" id="newsNum" style="display:none;">0</span>
+                            </a>
+                        </div>
+                        <div class="user-info">
+                            <img class="photo" src="/static{{ login_user.stu_avator }}">
+                            <p class="name">{{ login_user.stu_name }}</p>
+
+
+                            <ul class="my" id="login_logined_stu" identityid="1">
+                                <li><a href="/pages/dasai/stupersonalauth.html">个人认证</a></li>
+                                <li authstatus="4"><a href="/pages/dasai/personal_my_dasai.html">我的大赛</a></li>
+                                <li authstatus="4"><a href="/api/stu/award/li">获奖查询</a></li>
+                                <li authstatus="4"><a href="/pages/dasai/order/myorder.html">我的订单</a></li>
+                                <li><a href="/pages/account/message.html#/">我的消息</a></li>
+                                <li><a href="/pages/account/stu_address.html">我的地址</a></li>
+                                <li class="quit"><a href="/user/logout">退出</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>{% endcomment %}
+<iframe src="/contest/head" style="width:100%;height:75px;"></iframe>
+<div class="index">
+
+    <div class="sec-box banner flexsilde" id="bannerSilder">
+        <div class="hd">
+            <ul>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+        <div class="bd">
+            <ul>
+
+
+                <li>
+                    <a class="activity-temp" target="_blank" href="/pages/dasai/curren_item.html"
+                       style="background-image: url({% static 'images/banner20200323.png' %});"></a>
+                </li>
+
+                <li>
+                    <a class="activity-temp" target="_blank" href="/pages/dasai/exam_list.html"
+                       style="background-image: url({% static 'images/banner-20200228.jpg' %});"></a>
+                </li>
+                <li>
+                    <a class="activity-temp" target="_blank" href="https://www.lanqiao.cn/paths/38/?utm_source=lanqiao"
+                       style="background-image: url({% static 'images/banner-20200527.jpg' %});"></a>
+                </li>
+                <li>
+                    <a class="activity-temp" target="_blank" href="/pages/dasai/news_detail.html?id=1797"
+                       style="background-image: url({% static 'images/banner-20200715.jpg' %});"></a>
+                </li>
+
+            </ul>
+        </div>
+        <a class="prev" href="javascript:void(0)"></a>
+        <a class="next" href="javascript:void(0)"></a>
+    </div>
+
+    <div class="sec-box news">
+        <div class="clearfix">
+            {% comment %}<div class="fl">
+                <div>
+                    <h2>蓝桥杯介绍</h2>
+                    <div>为促进软件和信息领域专业技术人才培养，提升高校毕业生的就业竞争力，由教育部就业指导中心支持，工业和信息化部人才交流中心举办蓝桥杯大赛。十一年来，包括北大、清华在内的超过 1300
+                        余所院校，累计40万余名学子报名参赛，IBM、百度等知名企业全程参与，成为国内始终领跑的人才培养选拔模式并获得行业深度认可的IT类科技竞赛。
+                    </div>
+                    <a target="_blank" href="/pages/dasai/about_ours.html">关于我们</a>
+                </div>
+            </div>{% endcomment %}
+
+            <div class="fr">
+                <ul class="tabs clearfix">
+                    {#                    <li class="act" href="/pages/dasai/notes.html?id=20"><a href="javascript:void(0);">大赛通知</a></li>#}
+                    <li href="/pages/dasai/news.html?id=19"><a href="javascript:void(0);">大赛信息</a></li>
+
+                    {#                    <a id="tabs_more" href="/pages/dasai/notes.html?id=20" target="_blank">MORE&gt;&gt;</a>#}
+                </ul>
+                <div class="tabs-content">
+                    <div class="tab-box tab2">
+                        <ul>
+                            {% for con in res %}
+                                <li><a href="/contest/detial/{{ con.con_id }}/" target="_blank">
+                                    <h3>{{ con.con_name }}</h3>
+                                    <p>{{ con.con_time|date:"Y-m-d" }}</p>
+                                </a></li>
+                            {% empty %}
+                                <li><a href="/pages/dasai/news_detail.html?id=1826" target="_blank">
+                                    <h3>暂无竞赛信息</h3>
+                                </a></li>
+                            {% endfor %}
+
+                        </ul>
+
+                    </div>
+
+                </div>
+                <div class="news-pager clearfix" id="page">
+                    <ul>
+                        {% if tpage > 1 %}
+                        <div>
+                            {% if cpage > 1 %}
+                                <li><a href="/?cpage=1">首页</a></li>
+                                <li><a href="/?cpage={{ cpage|add:-1}}">&lt;</a></li>
+                            {% endif %}
+                            <li class="active"><a href="javascript:void(0);" class="current">{{ cpage }}</a></li>
+                            {% if cpage < tpage %}
+                                <li><a href="/?cpage={{ cpage|add:1}}">&gt;</a></li>
+                                <li><a href="/?cpage={{ tpage }}">尾页</a></li>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                            <li class="active"><a href="javascript:void(0);" class="current">{{ cpage }}</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+
+
+    $(function () {
+        $("#bannerSilder").slide({
+            mainCell: ".bd ul",
+            effect: 'left',
+            autoPlay: true,
+            trigger: 'click',
+            easing: 'linear',
+            delayTime: 500,
+            mouseOverStop: true,
+            pnLoop: true
+        });
+
+
+    })
+
+
+</script>
+</body>
+</html>

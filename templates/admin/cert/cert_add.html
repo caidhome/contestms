@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+{% load filters %}
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>证书竞赛-天梯赛后台管理系统</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="{% static 'css/font.css' %}">
+    <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
+    <!-- <link rel="stylesheet" href="./css/theme5.css"> -->
+    <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
+</head>
+
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+    <form class="layui-form" method="post" id="cert_add_form">
+        <div class="layui-col-xs12 layui-col-sm12 layui-col-md3">
+            <div class="grid-demo grid-demo-bg1">
+                <div class="layui-row">
+                    {% csrf_token %}
+                    <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>名称</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="username" name="cert_name" required="" lay-verify="required"
+                                   autocomplete="off" class="layui-input" value="{{ cert.cert_name }}"></div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>获奖人</label>
+                        <div class="layui-input-inline">
+                            <input type="text" placeholder="X坐标" name="cert_userx" required="" lay-verify="required"
+                                   autocomplete="off" class="layui-input cur_input"
+                                   value="{{ cert.cert_userx }}">
+                            <div style="padding-top: 10px;"></div>
+                            <input type="text" placeholder="Y坐标" name="cert_usery" required="" lay-verify="required"
+                                   autocomplete="off" class="layui-input cur_input"
+                                   value="{{ cert.cert_usery }}"></div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label for="phone" class="layui-form-label">
+                            <span class="x-red">*</span>级别</label>
+                        <div class="layui-input-inline">
+                            <input type="text" placeholder="X坐标" name="cert_levelx" required=""
+                                   lay-verify="required" autocomplete="off" class="layui-input cur_input"
+                                   value="{{ cert.cert_levelx }}">
+                            <div style="padding-top: 10px;"></div>
+                            <input type="text" placeholder="Y坐标" name="cert_levely" required=""
+                                   lay-verify="required" autocomplete="off" class="layui-input cur_input"
+                                   value="{{ cert.cert_levely }}"></div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>二维码</label>
+                        <div class="layui-input-inline">
+                            <input type="text" placeholder="X坐标" name="cert_qrcodex" required=""
+                                   lay-verify="required" autocomplete="off" class="layui-input cur_input"
+                                   value="{{ cert.cert_qrcodex }}">
+                            <div style="padding-top: 10px;"></div>
+                            <input type="text" placeholder="Y坐标" name="cert_qrcodey" required=""
+                                   lay-verify="required" autocomplete="off" class="layui-input cur_input"
+                                   value="{{ cert.cert_qrcodey }}"></div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>指导教师</label>
+                        <div class="layui-input-inline">
+                            <input type="text" placeholder="X坐标" name="cert_teachx" required=""
+                                   lay-verify="required" autocomplete="off" class="layui-input cur_input"
+                                   value="{{ cert.cert_teachx }}">
+                            <div style="padding-top: 10px;"></div>
+                            <input type="text" placeholder="Y坐标" name="cert_teachy" required=""
+                                   lay-verify="required" autocomplete="off" class="layui-input cur_input"
+                                   value="{{ cert.cert_teachy }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-xs12 layui-col-sm12 layui-col-md9">
+            <div class="grid-demo">
+                <div class="layui-row">
+                    <div class="layui-form-item">
+                            <label class="layui-form-label">上传模板</label>
+                            <div>
+                                <button type="button" class="layui-btn  layui-btn-sm" id="demo1">选择</button>
+                            </div>
+                            <div class="layui-input-inline" style="width: 80%;">
+                                <div class="layui-upload">
+                                    <input type="hidden" name="cert_imgurl" required=""
+                                       lay-verify="required" value="{{ cert.cert_imgurl }}" id="logo">
+                                    <div class="layui-upload-list">
+
+                                        <p id="demoText"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    <img class="layui-upload-img" width="100%" height="100%" id="reback_img" src="">
+        <div class="layui-col-ls12">
+            <div class="grid-demo">
+                <div class="layui-row">
+                    <div class="layui-form-item">
+                        <label for="L_repass" class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">
+                            {% if cert.cert_id %}更新{% else %}增加{% endif %}
+                        </button>
+                    </div>
+                    <input type="hidden" name="cert_id" value="{{ cert.cert_id }}">
+                </div>
+            </div>
+        </div>
+    </form>
+    </div>
+
+</div>
+<script>
+    var cur_input = '';
+    layui.use(['laydate', 'form', 'layer', 'upload'],
+    function () {
+        var $ = layui.$;
+        var form = layui.form,
+            layer = layui.layer,
+            laydate = layui.laydate,
+            upload = layui.upload,
+            demoText = $('#demoText');
+        var myVarate;
+        if('{{ cert.cert_imgurl }}' != '' && '{{ cert.cert_imgurl }}' != 'None')
+            myVarate = '/static{{ cert.cert_imgurl }}';
+        else
+            myVarate = '/static/images/default_cert.jpeg';
+
+
+        $('#reback_img').attr('src', myVarate);//页面初始化的时候渲染图片
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem: '#demo1',
+            url: '/user/upload',//这里填写你的上传地址
+            accept: 'images',
+            method: 'post',
+            data: {
+                'csrfmiddlewaretoken': function () {
+                    return $(':input:first').val()
+                },
+                'fpath': '/cert/template'
+            }
+            , acceptMime: 'image/*'
+            , before: function (obj) {
+                /*如果您不想用上面的URL 进行上传,也可以在这里,添加你的上传方式*/
+                obj.preview(function (index, file, result) {
+                    $('#reback_img').attr('src', result);//图片链接（base64）
+                });
+            }, done: function (res) {
+                if (res.code == 6) {//长传成功(具体返回code 看后台是怎么处理的)
+                    $('#logo').val(res.url)
+                    layer.msg(res.msg);
+                    $('#reback_img').attr('src', '/static' + res.url);
+                } else {
+                    return layer.msg(res.msg);
+                    demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                }
+            }
+            , error: function () {
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+            }
+        });
+        //上传失败监听重试按钮的操作
+        demoText.find('.demo-reload').on('click', function () {
+            uploadInst.upload();
+        });
+
+        //自定义验证规则
+        form.verify({
+            nikename: function (value) {
+                if (value.length < 5) {
+                    return '昵称至少得5个字符啊';
+                }
+            },
+            pass: [/(.+){6,12}$/, '密码必须6到12位'],
+            repass: function (value) {
+                if ($('#L_pass').val() != $('#L_repass').val()) {
+                    return '两次密码不一致';
+                }
+            }
+        });
+
+        //监听提交
+        form.on('submit(add)',
+            function (data) {
+                var data = $('#cert_add_form').serialize()
+                $.ajax({
+                    url: '/cert/add',
+                    data: data,
+                    dataType: "json",
+                    type: "POST",
+                    success: function (result) {
+                        if (result.code === 6) {
+                            layer.alert(result.msg, {
+                                    icon: result.code
+                                },
+                                function () {
+                                    parent.location.reload(true);
+                                    // 获得frame索引
+                                    var index = parent.layer.getFrameIndex(window.name);
+                                    console.log(index)
+                                    //关闭当前frame
+                                    parent.layer.close(index);
+                                });
+                        } else {
+                            layer.alert(result.msg, {
+                                icon: result.code
+                            });
+                        }
+                    }
+                });
+                return false;
+            });
+
+        $('.cur_input').click(function(e){
+            cur_input=$(this).attr('name')
+            cur_input = cur_input.substring(0,cur_input.length-1)
+        });
+
+        $('#reback_img').click(function(e){
+            //获取鼠标在图片上的坐标
+            $("input[name="+cur_input+"x]").val(e.offsetX)
+            $("input[name="+cur_input+"y]").val(e.offsetY)
+        });
+
+    });
+
+
+
+</script>
+</body>
+
+</html>
