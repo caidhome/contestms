@@ -3,19 +3,22 @@ import os
 import re
 
 from django.core import serializers
+from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect, HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.http import HttpResponseRedirect
+from django_redis import get_redis_connection
 
 from TiantiMS import settings
 from userms.models import Admin, Student
 from contestms.models import Contest, Sign
 from django.http import JsonResponse
 from django.views.decorators.clickjacking import xframe_options_sameorigin
-import json
+from random import randint
+import hashlib
 
 # Create your views here.
 class Admin_LoginView(View):
@@ -512,3 +515,117 @@ def page_not_found(request, exception):  # 注意点 ①
 # 500
 def page_error(request):
     return render(request, '500.html')
+
+
+
+#生成随机的验证码
+def Email_Code():
+    code_ = ''
+    code_str = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLNMOPQRSTUVWXYZ1234567890'
+    for k in range(5):
+        code_ += code_str[randint(0,35)]
+    return code_
+
+#   md5加盐
+def md5_md5(params):
+    md5 = hashlib.md5(params.encode(encoding='utf-8'))
+    return md5.hexdigest()
+
+class StuUpdateInfo(View):
+    def post(self, request):
+        # try:
+            # 从前端获取验证码
+        login_user = request.session.get('login_user')
+        is_login = request.session.get('is_login')
+        if not login_user or not is_login:
+            return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/user/stu_info'})
+        try:
+            stu = Student.objects.get(stu_id=login_user['stu_id'])
+        except Exception as ex:
+            print(ex)
+            return render(request, 'student/login.html', {'err_msg': '暂无查到此账户信息，请重新登录！', 'next': '/user/stu_info'})
+        email = stu.stu_email  # 获取前端邮箱
+        code = request.POST.get('verif') #获取前段的验证码
+        # 验证邮箱的格式
+        re_email = r'(\w+)@(\w+)\.(\w+)'
+        if not re.match(re_email, email):
+            return JsonResponse({'code': 2, 'msg': '邮箱格式不正确'})
+        #判断是否输入了验证码
+        if not code:
+            return JsonResponse({'code':2,'msg':'请输入验证码'})
+        #获取验证码，并判断是否失效了
+
+        key = 'tts_' + email
+        redis_client = get_redis_connection('code')
+        code_ = str(redis_client.get(key), 'utf-8')
+        # code_ = cache.get('tts_'+email)
+        if not code_:
+            return JsonResponse({'code':2,'msg':'验证码已失效'})
+        #判断输入的验证码，和获取到的验证码是否一致
+        if code == code_:
+            stu_pwd = request.POST.get('stu_pwd')  # 获取前端邮箱
+            stu_tel = request.POST.get('stu_tel')  # 获取前段的验证码
+            stu_email = request.POST.get('stu_email')  # 获取前段的验证码
+            if stu_pwd:
+                stu.stu_pwd = stu_pwd
+            if stu_tel:
+                stu.stu_tel = stu_tel
+            if stu_email:
+                stu.stu_email = stu_email
+            stu.save()
+            return JsonResponse({'code':6 ,'msg':'修改成功！'})
+        return JsonResponse({'code':2,'msg':'验证码错误'})
+        #返回错误信息
+        # except Exception as ex:
+        #     print(ex)
+        #     return JsonResponse({'code': 2, 'msg': '网络有些问题，请等一下再试'})
+
+
+# post请求
+# 获取到验证码，并存入redis
+# 发生邮箱
+class Email_code_APIView(View):
+    def post(self, request):
+        # try:
+            # 从前端获取验证码
+            login_user = request.session.get('login_user')
+            is_login = request.session.get('is_login')
+            if not login_user or not is_login:
+                return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/user/stu_info'})
+            try:
+                stu = Student.objects.get(stu_id=login_user['stu_id'])
+            except Exception as ex:
+                print(ex)
+                return render(request, 'student/login.html', {'err_msg': '暂无查到此账户信息，请重新登录！', 'next': '/user/stu_info'})
+            # email = request.POST.get('email')
+            email = stu.stu_email
+
+            key = 'tts_' + email
+            redis_client = get_redis_connection('code')
+            code_ = redis_client.get(key)
+            if not code_:
+                # 生成随机的验证码
+                code = Email_Code()
+                # 给邮箱发送验证码
+                # 发邮件
+                from_email = settings.EMAIL_FROM
+                subject = '竞赛管理系统-修改个人信息'
+                text_content = ''
+                html_content = '<p style="font-size: 18px;">[兰州理工大学竞赛管理系统] 验证码:<br><br><div style="text-align: center; font-size: 24px;"><strong><a href="">%s</a></strong></div>' \
+                               '<br><br>该验证码仅用于身份验证，请勿泄露给他人使用。</p>' % code
+                send_msg = EmailMultiAlternatives(subject, text_content, from_email, [email])
+                send_msg.attach_alternative(html_content, "text/html")
+                send_msg.send()
+
+                redis_client = get_redis_connection('code')
+                redis_client.setex(key, 60 * 5, code)
+            # cache.set(key, code, 30)  # 5分钟的有效时间
+            ret = {
+                'code': 6,
+                'msg': "邮件发送成功"
+            }
+            return JsonResponse(ret)
+        # 返回错误信息
+        # except Exception as ex:
+        #     print(ex)
+        #     return JsonResponse({'code': 0, 'msg': '网络有些问题，请等一下再试'})

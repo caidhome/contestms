@@ -1,35 +1,21 @@
 import datetime
-import io
-import json
 import os
-import sys
-import tempfile
 import zipfile
-from wsgiref.util import FileWrapper
-
 import qrcode
 import xlrd as xlrd
 from PIL import Image, ImageDraw, ImageFont
-from django.core import serializers
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-# import xlrd
 from django.shortcuts import render, redirect, HttpResponse
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
-# from xlwt import Workbook
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from reportlab.lib.pagesizes import portrait
 from reportlab.pdfgen import canvas
-
 from contestms.models import Contest, Sign, Cert
 from userms.models import Admin, Student
-from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.http import JsonResponse
-from django.db.models import Q
 from TiantiMS import settings
-import time
-
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 # Create your views here.
 
 class ListView(View):
@@ -223,6 +209,7 @@ class DetialView(View):
     @xframe_options_sameorigin
     def post(self, request, cid):
         pass
+
 class HeadView(View):
 
     @xframe_options_sameorigin
@@ -232,7 +219,6 @@ class HeadView(View):
     @xframe_options_sameorigin
     def post(self, request):
         pass
-
 
 class Sign_Person_View(View):
 
@@ -291,12 +277,24 @@ class SignView(View):
         if not con or not stu or len(stu) <= 0:
             code = 2
             msg = '报名失败，暂无该学生或竞赛信息！'
-        sign_list = Sign.objects.filter(sign_conid_id=con.con_id, sign_stuid_id=stu[0].stu_id)
+        cur_stu = stu[0]
+        sign_list = Sign.objects.filter(sign_conid_id=con.con_id, sign_stuid_id=cur_stu.stu_id)
         if sign_list and len(sign_list) > 0:
             return JsonResponse({'code': 2, 'msg': '您已报名！'})
 
-        sign = Sign(sign_lang=sign_lang, sign_state=0, sign_conid_id=con.con_id, sign_teach=sign_teach, sign_stuid=stu[0])
+        sign = Sign(sign_lang=sign_lang, sign_state=0, sign_conid_id=con.con_id, sign_teach=sign_teach, sign_stuid=cur_stu)
         sign.save()
+
+        # 发邮件
+        from_email = settings.EMAIL_FROM
+        subject = '竞赛管理系统-报名成功'
+        text_content = '这是一封重要的邮件.'
+        html_content = '<p style="font-size: 18px;"><strong>%s</strong> 同学, 恭喜你：<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;你报名的 <strong><a href="%s/contest/detial/%s/">%s</a></strong> 报名成功' \
+                       '具体报名信息请查看<a href="%s/user/student/%s/">个人主页</a>。</p>' % (cur_stu.stu_name, settings.PRO_HOST_URL, con.con_id, con.con_name, settings.PRO_HOST_URL, cur_stu.stu_id)
+        send_msg = EmailMultiAlternatives(subject, text_content, from_email, [stu[0].stu_email])
+        send_msg.attach_alternative(html_content, "text/html")
+        send_msg.send()
+
         response_data = {
             "code": code
             , "msg": msg

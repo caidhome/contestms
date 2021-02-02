@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '_w*sfc^-kz#7(k7#8ke_g(npna$(kt()3ky$803q3+hfrv8qs#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # 'django.middleware.cache.UpdateCacheMiddleware',  # 放在第一
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',  # 放在最后
 ]
 
 ROOT_URLCONF = 'TiantiMS.urls'
@@ -85,18 +87,18 @@ DATABASES = {
     'default': {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
-        # 'ENGINE': 'django.db.backends.mysql',
-        # 'HOST': '127.0.0.1',  # 数据库主机
-        # 'PORT': 3306,  # 数据库端口
-        # 'USER': 'root',  # 数据库用户名
-        # 'PASSWORD': 'root',  # 数据库用户密码
-        # 'NAME': 'tiantidb'  # 数据库名字
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '81.69.38.227',  # 数据库主机
-        'PORT': 8257,  # 数据库端口
-        'USER': 'ttsuser',  # 数据库用户名
-        'PASSWORD': '##d413d413@Tts..',  # 数据库用户密码
-        'NAME': 'ttsdb'  # 数据库名字
+        'HOST': '127.0.0.1',  # 数据库主机
+        'PORT': 3306,  # 数据库端口
+        'USER': 'root',  # 数据库用户名
+        'PASSWORD': 'root',  # 数据库用户密码
+        'NAME': 'tiantidb'  # 数据库名字
+        # 'ENGINE': 'django.db.backends.mysql',
+        # 'HOST': '81.69.38.227',  # 数据库主机
+        # 'PORT': 8257,  # 数据库端口
+        # 'USER': 'ttsuser',  # 数据库用户名
+        # 'PASSWORD': '##d413d413@Tts..',  # 数据库用户密码
+        # 'NAME': 'ttsdb'  # 数据库名字
     }
 }
 
@@ -134,14 +136,14 @@ USE_L10N = True
 USE_TZ = False
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
-
 STATIC_URL = '/static/'
 
-STATIC_ROOT = 'static' ## 新增行
+# STATIC_ROOT = 'static' ## 新增行
+# STATICFILES_DIRS = [
+#   os.path.join(BASE_DIR, '/static/'), ##修改地方
+# ]
 STATICFILES_DIRS = [
-  os.path.join(BASE_DIR, '/static/'), ##修改地方
+  os.path.join(BASE_DIR, 'static'), ##修改地方
 ]
 
 
@@ -155,3 +157,37 @@ EMAIL_HOST_USER = 'hongliuTTS@163.com'	#这个是用来发送邮件的邮箱，�
 EMAIL_HOST_PASSWORD = 'QBPBRCJCLWSRJJGF'  #授权密码
 EMAIL_USE_SSL = True
 EMAIL_FROM = 'hongliuTTS@163.com'
+
+PRO_HOST_URL = 'http://81.69.38.227'
+
+
+# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+# SESSION_CACHE_ALIAS = "session"
+
+CACHES = {
+# django存缓默认位置,redis 0号库
+# default: 连接名称
+"default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://81.69.38.227:8217/0",
+        "OPTIONS": {
+               "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                }
+           },
+        # django session存 reidis 1 号库（现在基本不需要使用）
+        "session": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://81.69.38.227:8217/1",
+        "OPTIONS": {
+                  "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                }
+        },
+        # 图形验证码，存redis 2号库
+        "code": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://81.69.38.227:8217/2",
+        "OPTIONS": {
+        "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                }
+          }
+}

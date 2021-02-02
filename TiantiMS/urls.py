@@ -27,10 +27,10 @@ urlpatterns = [
     re_path('^admin/index$', Admin_IndexView.as_view(), name='admin_index'),
     re_path('^$', Stu_IndexView.as_view(), name='index'),
     re_path('^welcome$', WelcomeView.as_view(), name='welcome'),
-    url(r'^static/(?P<path>.*)$', static.serve,
-        {'document_root': settings.STATIC_ROOT}, name='static'),
+    # url(r'^static/(?P<path>.*)$', static.serve,
+    #     {'document_root': settings.STATIC_ROOT}, name='static'),
 ]
 
 
-handler404 = 'userms.views.page_not_found'
-handler500 = 'userms.views.page_error'
+# handler404 = 'userms.views.page_not_found'
+# handler500 = 'userms.views.page_error'
