@@ -8,6 +8,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect, HttpResponse
 from django.views.generic import View
 from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django_redis import get_redis_connection
 from reportlab.lib.pagesizes import portrait
 from reportlab.pdfgen import canvas
 from contestms.models import Contest, Sign, Cert
@@ -22,9 +23,23 @@ class ListView(View):
 
     @xframe_options_sameorigin
     def get(self, request):
+        is_login = request.session.get('is_login')
+        login_user_sess = request.session.get('login_user')
+        if not is_login or not login_user_sess or is_login == 3:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请登录后重试。', 'next': '/contest/list'})
+        login_id = login_user_sess['admin_id']
+        try:
+            loginUser = Admin.objects.get(admin_id=login_id)
+        except Exception as ex:
+            print(ex)
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请登录后重试。', 'next': '/contest/list'})
+
         pIndex = request.GET.get('cpage')
 
         search_dict = dict()
+        search_dict['con_createrid__admin_id'] = loginUser.admin_id
         # 如果有这个值 就写入到字典中去
         start = request.GET.get('start')
         end = request.GET.get('end')
@@ -179,9 +194,9 @@ class DetialView(View):
     @xframe_options_sameorigin
     def get(self, request, cid):
         is_login = request.session.get('is_login')
-        login_user = request.session.get('login_user')
-        if not is_login or not login_user or is_login == 0:
-            return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请登录后重试。', 'next': '/contest/detial/%s/'%cid})
+        # login_user = request.session.get('login_user')
+        # if not is_login or not login_user or is_login == 0:
+        #     return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请登录后重试。', 'next': '/contest/detial/%s/'%cid})
 
         contest = None
         try:
@@ -193,18 +208,26 @@ class DetialView(View):
             contest.con_lang = lang_str[:-2]
         except Exception as ex:
             print(ex)
-        if is_login in [1, 2]:
-            return render(request, 'admin/contest/contest_detial.html', {'con': contest, 'next': '/contest/detial'})
-        try:
-            stu = Student.objects.get(stu_id=login_user['stu_id'])
-        except Exception as ex:
-            print(ex)
-        sign = Sign.objects.filter(sign_stuid=stu, sign_conid=contest)
-        if sign and len(sign) > 0:
+        cur_sign = None
+        if is_login and is_login in [1, 2]:
+            return render(request, 'admin/contest/contest_detial.html', {'con': contest})
+        else:
+            stu = None
+            login_user = request.session.get('login_user')
+            # if not is_login or not login_user or is_login == 0:
+            #     return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请登录后重试。', 'next': '/contest/detial/%s/'%cid})
+            if login_user:
+                try:
+                    stu = Student.objects.get(stu_id=login_user['stu_id'])
+                    sign = Sign.objects.filter(sign_stuid=stu, sign_conid=contest)
+                    if sign and len(sign) > 0:
+                        cur_sign = sign[0]
+                except Exception as ex:
+                    print(ex)
             # contest.sign = True
             # contest.state = sign[0].sign_state
-            return render(request, 'student/contest_detial.html', {'con': contest, 'sign': sign[0], 'next': '/contest/detial'})
-        return render(request, 'student/contest_detial.html', {'con': contest, 'next': '/contest/detial'})
+            # return render(request, 'student/contest_detial.html', {'con': contest, 'sign': sign[0], 'next': '/contest/detial'})
+        return render(request, 'student/contest_detial.html', {'con': contest, 'sign': cur_sign})
 
     @xframe_options_sameorigin
     def post(self, request, cid):
@@ -243,7 +266,10 @@ class SignView(View):
 
     @xframe_options_sameorigin
     def get(self, request, cid):
-
+        is_login = request.session.get('is_login')
+        login_user = request.session.get('login_user')
+        if not is_login or not login_user:
+            return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/contest/sign/%s/' % cid})
         contest = None
         try:
             contest = Contest.objects.get(con_id=cid)
@@ -255,10 +281,10 @@ class SignView(View):
         return render(request, 'student/contest_sign.html', {'con': contest})
 
     def post(self, request, cid):
-        # is_login = request.session.get('is_login')
-        # login_user = request.session.get('login_user')
-        # if not is_login or not login_user:
-        #     return JsonResponse({"code": 2, "msg": '您还未登录！'})
+        is_login = request.session.get('is_login')
+        login_user = request.session.get('login_user')
+        if not is_login or not login_user:
+            return JsonResponse({"code": 2, "msg": '您还未登录！'})
 
         sign_lang = request.POST.get('sign_lang')
         stu_no = request.POST.get('stu_no')
@@ -686,11 +712,12 @@ class Cert_download_View(View):
 class Template_download_View(View):
 
     def get(self, request):
+        file_name = request.GET.get('fname')
         try:
-            file = open("%s/static%s" % (settings.BASE_DIR, '/download/contest/score/score_template.xlsx'), 'rb')
+            file = open("%s/static%s" % (settings.BASE_DIR, '/download/common/template/%s' % file_name), 'rb')
             response = HttpResponse(file)
             response['Content-Type'] = 'application/octet-stream'  # 设置头信息，告诉浏览器这是个文件
-            response['Content-Disposition'] = 'attachment;filename="upload_template.xlsx"'
+            response['Content-Disposition'] = 'attachment;filename="%s"' % file_name
             return response
         except Exception as ex:
             print(ex)
@@ -754,6 +781,55 @@ class Downzip_Certs_View(View):
 
     def post(self, request):
         pass
+
+
+class SendNoticeView(View):
+
+    def get(self, request):
+        pass
+
+    def post(self, request, cid):
+        redis_client = get_redis_connection('code')
+        con_send_state = redis_client.get('tts_con_sendnotice_state_' + cid)
+        if con_send_state and con_send_state.decode() == '1':
+            return JsonResponse({'code': 2, 'msg': '通知已发送，请勿重复发送！'})
+        code = 6
+        msg = '通知群发成功！'
+        email_list = list()
+        con = None
+        try:
+            con = Contest.objects.get(con_id=cid)
+            if con.con_endtime < datetime.datetime.now():
+                return JsonResponse({'code': 2, 'msg': '该竞赛报名已结束！'})
+        except Exception as ex:
+            print(ex)
+            return JsonResponse({'code': 2, 'msg': '暂无该竞赛！'})
+        try:
+            stu_list = Student.objects.all()
+            if stu_list and len(stu_list)>0:
+                for stu_item in stu_list:
+                    if stu_item.stu_email:
+                        email_list.append(stu_item.stu_email)
+        except Exception as ex:
+            print(ex)
+            code = 2
+            msg = '服务器错误！'
+        from_email = settings.EMAIL_FROM
+        subject = '竞赛管理系统-报名通知'
+        text_content = ''
+        html_content = '<p style="font-size: 18px;"><strong></strong> 同学, 你好：<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;天梯赛管理系统刚刚发布了 <strong><a href="%s/contest/detial/%s/">%s</a></strong>' \
+                       '，赶紧去报名吧！<br/>具体报名信息请查看<a href="%s/contest/detial/%s/">竞赛详情</a>吧。</p>' % (
+                       settings.PRO_HOST_URL, cid, con.con_name, settings.PRO_HOST_URL,
+                       cid)
+        send_msg = EmailMultiAlternatives(subject, text_content, from_email, email_list)
+        send_msg.attach_alternative(html_content, "text/html")
+        send_msg.send()
+        redis_client.setex('tts_con_sendnotice_state_' + cid, 60 * 60 * 24 * 30, 1)
+        response_data = {
+            "code": code
+            , "msg": msg
+        }
+        return JsonResponse(response_data)
 
 
 

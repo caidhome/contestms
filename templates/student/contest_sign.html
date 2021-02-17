@@ -282,10 +282,12 @@
       $('#form_1').submit(function () {
           $.ajax({
                 url: '/user/stu_query_person',
-                data: {'user_id': $("input[name='stu_id']").val(),
+                data: {'user_id': $("input[name='stu_id']").val()
+                    {% comment %},
                     'csrfmiddlewaretoken': function () {
                     return $(':input:first').val()
-                }},
+                }{% endcomment %}
+                },
                 dataType: "json",
                 type: "GET",
                 success: function (result) {
@@ -320,14 +322,14 @@
                     dataType: "json",
                     type: "POST",
                     success: function (result) {
-                        if(result.code == 6){
-                            window.top.location.href='/contest/detial/{{ con.con_id }}/'
-                        }else{
-                            window.top.location.reload()
-                        }
                         layer.msg(result.msg, {
                             icon: result.code
                         });
+                        if(result.code == 6){
+                            window.top.location.href='/contest/detial/{{ con.con_id }}/'
+                        }else{
+                            {#window.top.location.reload()#}
+                        }
                     },
                     error: function (result) {
                         layer.msg('服务器异常！', {

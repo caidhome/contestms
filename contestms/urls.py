@@ -17,10 +17,11 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from contestms.views import ListView, AddView, DelView, DetialView, HeadView, SignView, \
     UploadScoreView,Sign_List_View, Sign_Check_View, Sign_GenCert_View, Sign_Person_View,\
-    Sign_Score_View, Cert_download_View, Template_download_View, Downzip_Certs_View
+    Sign_Score_View, Cert_download_View, Template_download_View, Downzip_Certs_View,\
+    SendNoticeView
 
 urlpatterns = [
-    re_path('^list$', ListView.as_view(), name='login'),
+    re_path('^list$', ListView.as_view(), name='list'),
     re_path('^add$', AddView.as_view(), name='add'),
     re_path('^delete$', DelView.as_view(), name='delete'),
     re_path('^detial/(\d+)/$', DetialView.as_view(), name='detial'),
@@ -34,5 +35,6 @@ urlpatterns = [
     re_path('^sign/check/(\d+)/$', Sign_Check_View.as_view(), name='sign_check'),
     re_path('^sign/gen_cert/(\d+)/(\d+)/$', Sign_GenCert_View.as_view(), name='sign_gen_cert'),
     re_path('^sign/download/(\d+)/$', Cert_download_View.as_view(), name='dowload_cert'),
-    re_path('^sign/down_cert_zip/(\d+)/$', Downzip_Certs_View.as_view(), name='dowload_cert'),
+    re_path('^sign/down_cert_zip/(\d+)/$', Downzip_Certs_View.as_view(), name='down_cert_zip'),
+    re_path('^sendnotice/(\d+)/$', SendNoticeView.as_view(), name='sendnotice'),
 ]

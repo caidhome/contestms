@@ -148,7 +148,8 @@ body{
 }
 .navigation-wrap .head-wrap .right-wrap .ent-wrap .user .photo{
 	position: relative;
-	left: 40px;
+    left: 0px;
+    margin-right: 10px;
 }
 .navigation-wrap .head-wrap .right-wrap .ent-wrap .user .name{
 	color: #333333;
@@ -452,11 +453,11 @@ body{
 }
 .flexsilde .prev{ 
 	left: 0;
-	background-image: url(../images/flex-left.png);
+	background-image: url(/static/images/flex-left.png);
 }
 .flexsilde .next{ 
 	right: 0;
-	background-image: url(../images/flex-right.png);
+	background-image: url(/static/images/flex-right.png);
 }
 .flexsilde .prev:hover,
 .flexsilde .next:hover{ 

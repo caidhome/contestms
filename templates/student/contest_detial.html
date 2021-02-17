@@ -144,7 +144,7 @@
                 <span>七、竞赛级别：</span><br>
                {{ con.con_level|level }}
                 <br><br>
-
+                {% if request.session.login_user %}
                     {% if sign %}
                         {% if sign.sign_state != 2 %}
                             <div class="csign inputcase1">
@@ -176,7 +176,20 @@
                         {% endif %}
                     </div>
                 {% endif %}
-
+            {% else %}
+                {% if con.con_signtime <= con.today and con.con_endtime >= con.today %}
+                   <div class="csign inputcase1">
+                        <a href="/user/login?next=/contest/sign/{{ con.con_id }}/">登录并报名</a>
+                    </div>
+                {% elif con.today < con.con_signtime %}
+                    <div class="csign inputcase1">
+                        报名未开始
+                    </div>
+                {% else %}
+                    <div class="csign inputcase1">
+                    报名已结束</div>
+                {% endif %}
+            {% endif %}
             </div>
             <div class="clear"></div>
         </div>

@@ -46,16 +46,18 @@
                             </form>
                         </div>{% endcomment %}
                         <div class="layui-card-header">
-                            <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量删除</button>
+{#                            <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量删除</button>#}
                             <button class="layui-btn" onclick="xadmin.open('添加学生','/user/add/2/',500,550)"><i class="layui-icon"></i>添加</button>
+                            <button class="layui-btn layui-btn-normal" id="test3"><i class="layui-icon">&#xe62f;</i> 批量上传</button>
+                            <a href="/contest/down_temp?fname=stu_info_upload_template.xlsx" style="color: #00a687; font-size: 13px;">下载模板</a>
                         </div>
                         <div class="layui-card-body ">
                             <table class="layui-table layui-form">
                               <thead>
                                 <tr>
-                                  <th>
+                                  {% comment %}<th>
                                     <input type="checkbox" name=""  lay-skin="primary">
-                                  </th>
+                                  </th>{% endcomment %}
                                   <th>ID</th>
                                   <th>头像</th>
                                   <th>学号</th>
@@ -69,9 +71,9 @@
                               <tbody>
                               {% for stu in res %}
                                 <tr>
-                                  <td>
+                                 {% comment %} <td>
                                     <input type="checkbox" name="stu_id"  lay-skin="primary">
-                                  </td>
+                                  </td>{% endcomment %}
                                   <td>{{ stu.stu_id }}</td>
                                   <td><img style="height:35px;width:35px;border-radius:50%;line-height:50px!important;" src="/static{{ stu.stu_avator }}"></td>
                                     <td>{{ stu.stu_no }}</td>
@@ -107,18 +109,20 @@
                                 {% if tpage > 1 %}
                                 <div>
                                     {% if cpage > 1 %}
-                                        <a class="num cpage" href="/user/list/1/?cpage=1&role=1">首页</a>
-                                        <a class="prev" href="/user/list/1/?cpage={{ cpage|add:-1}}">&lt;</a>
+                                        <a class="num cpage" href="/user/list/2/?cpage=1">首页</a>
+                                        <a class="prev" href="/user/list/2/?cpage={{ cpage|add:-1}}">&lt;</a>
                                     {% endif %}
                                     <span class="current">{{ cpage }}</span>
                                     {% if cpage < tpage %}
-                                        <a class="next" href="/user/list/1/?cpage={{ cpage|add:1}}">&gt;</a>
-                                        <a class="num tpage" href="/user/list/1/?cpage={{ tpage }}">尾页</a>
+                                        <a class="next" href="/user/list/2/?cpage={{ cpage|add:1}}">&gt;</a>
+                                        <a class="num tpage" href="/user/list/2/?cpage={{ tpage }}">尾页</a>
                                     {% endif %}
+                                    共 {{ tpage }} 页
                                 </div>
                                 {% else %}
                                     <span class="current">{{ cpage }}</span>
                                 {% endif %}
+
                             </div>
                         </div>
                     </div>
@@ -127,9 +131,29 @@
         </div> 
     </body>
     <script>
-      layui.use(['laydate','form'], function(){
+      layui.use(['laydate', 'form', 'upload'], function(){
         var laydate = layui.laydate;
         var form = layui.form;
+        var upload = layui.upload;
+
+        var csrf_data = $('[name="csrfmiddlewaretoken"]').val()
+        //指定允许上传的文件类型
+        upload.render({
+            elem: '#test3'
+            , url: '/user/uploadstuinfo' //改成您自己的上传接口
+            , data: {'csrfmiddlewaretoken': csrf_data}
+            , accept: 'file' //普通文件
+            , ext: '.xlsx'
+            , done: function (res) {
+                var alert_info = res.msg
+                if(res.errorlist.length > 0)
+                   alert_info = alert_info+"<br/>上传失败名单：<hr/>"+res.errorlist
+                layui.layer.alert(alert_info, {icon: res.code}, function () {
+                    location.reload()
+                })
+
+            }
+        });
         
         //执行一个laydate实例
         laydate.render({

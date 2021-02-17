@@ -2,6 +2,7 @@ import datetime
 import os
 import re
 
+import xlrd
 from django.core import serializers
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -13,6 +14,8 @@ from django.http import HttpResponseRedirect
 from django_redis import get_redis_connection
 
 from TiantiMS import settings
+from certms.models import Cert
+from userms import models
 from userms.models import Admin, Student
 from contestms.models import Contest, Sign
 from django.http import JsonResponse
@@ -48,7 +51,8 @@ class Admin_LoginView(View):
 class Stu_LoginView(View):
 
     def get(self, request):
-        return render(request, 'student/login.html')
+        next = request.GET.get('next')
+        return render(request, 'student/login.html', {'next': next})
 
     def post(self, request):
         stu_no = request.POST.get('stu_no')
@@ -62,7 +66,8 @@ class Stu_LoginView(View):
                    'stu_avator': stu.stu_avator}
             request.session['is_login'] = 3  # 这个session是用于后面访问每个页面（即调用每个视图函数时要用到，即判断是否已经登录，用此判断）
             request.session['login_user'] = stu
-            if next:
+            print(next)
+            if next and next != 'None':
                 return HttpResponseRedirect(next)
             return HttpResponseRedirect('/')
         return render(request, 'student/login.html', {'err_msg': '账号或密码错误！'})
@@ -70,42 +75,43 @@ class Stu_LoginView(View):
 class Stu_IndexView(View):
 
     def get(self, request):
+        login_user = None
         is_login = request.session.get('is_login')
-        if not is_login or is_login != 3:
-            return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
+        # if not is_login or is_login != 3:
+        #     return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
         login_user_sess = request.session.get('login_user')
-        if login_user_sess:
+        if login_user_sess and is_login == 3:
             login_id = login_user_sess['stu_id']
             try:
                 login_user = Student.objects.get(stu_id=login_id)
             except Exception as ex:
                 print('查询异常')
                 print(ex)
-                return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
-            pIndex = request.GET.get('cpage')
-            res = Contest.objects.filter().order_by('con_time')
-            paginator = Paginator(res, 8)
-            try:
-                # page对象
-                list_page = paginator.page(pIndex)
-            except PageNotAnInteger:
-                list_page = paginator.page(1)
-            except EmptyPage:
-                list_page = paginator.page(paginator.num_pages)
-            p = Paginator(res, 10)
-            if not pIndex:
-                pIndex = '1'
-            pIndex = int(pIndex)
+                # return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
+        pIndex = request.GET.get('cpage')
+        res = Contest.objects.filter().order_by('con_time')
+        paginator = Paginator(res, 8)
+        try:
+            # page对象
+            list_page = paginator.page(pIndex)
+        except PageNotAnInteger:
+            list_page = paginator.page(1)
+        except EmptyPage:
+            list_page = paginator.page(paginator.num_pages)
+        p = Paginator(res, 10)
+        if not pIndex:
+            pIndex = '1'
+        pIndex = int(pIndex)
 
-            totol_page = p.page_range
-            rep_data = {
-                'res': list_page,
-                'tpage': len(totol_page),
-                'cpage': pIndex,
-                'login_user': login_user
-            }
-            return render(request, 'student/index.html', rep_data)
-        return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
+        totol_page = p.page_range
+        rep_data = {
+            'res': list_page,
+            'tpage': len(totol_page),
+            'cpage': pIndex,
+            'login_user': login_user
+        }
+        return render(request, 'student/index.html', rep_data)
+        # return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
 
     def post(self, request):
         pass
@@ -135,7 +141,24 @@ class WelcomeView(View):
 
     @xframe_options_sameorigin
     def get(self, request):
-        return render(request, 'admin/welcome.html')
+        stu_num = 0
+        admin_num = 0
+        contest_num = 0
+        cert_num = 0
+        try:
+            stu_num = len(Student.objects.all())
+            admin_num = len(Admin.objects.all())
+            contest_num = len(Contest.objects.all())
+            cert_num = len(Cert.objects.all())
+        except Exception as ex:
+            print(ex)
+        data_dict = {
+            'stu_num': stu_num,
+            'admin_num': admin_num,
+            'contest_num': contest_num,
+            'cert_num': cert_num
+        }
+        return render(request, 'admin/welcome.html', data_dict)
 
     def post(self, request):
         pass
@@ -518,18 +541,7 @@ def page_error(request):
 
 
 
-#生成随机的验证码
-def Email_Code():
-    code_ = ''
-    code_str = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLNMOPQRSTUVWXYZ1234567890'
-    for k in range(5):
-        code_ += code_str[randint(0,35)]
-    return code_
 
-#   md5加盐
-def md5_md5(params):
-    md5 = hashlib.md5(params.encode(encoding='utf-8'))
-    return md5.hexdigest()
 
 class StuUpdateInfo(View):
     def post(self, request):
@@ -555,7 +567,7 @@ class StuUpdateInfo(View):
             return JsonResponse({'code':2,'msg':'请输入验证码'})
         #获取验证码，并判断是否失效了
 
-        key = 'tts_' + email
+        key = 'tts_verfiy_code_' + email
         redis_client = get_redis_connection('code')
         code_ = str(redis_client.get(key), 'utf-8')
         # code_ = cache.get('tts_'+email)
@@ -600,12 +612,12 @@ class Email_code_APIView(View):
             # email = request.POST.get('email')
             email = stu.stu_email
 
-            key = 'tts_' + email
+            key = 'tts_verfiy_code_' + email
             redis_client = get_redis_connection('code')
             code_ = redis_client.get(key)
             if not code_:
                 # 生成随机的验证码
-                code = Email_Code()
+                code = self.Email_Code()
                 # 给邮箱发送验证码
                 # 发邮件
                 from_email = settings.EMAIL_FROM
@@ -629,3 +641,126 @@ class Email_code_APIView(View):
         # except Exception as ex:
         #     print(ex)
         #     return JsonResponse({'code': 0, 'msg': '网络有些问题，请等一下再试'})
+
+    def get(self, request):
+        pass
+
+    # 生成随机的验证码
+    def Email_Code(self):
+        code_ = ''
+        code_str = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLNMOPQRSTUVWXYZ1234567890'
+        for k in range(5):
+            code_ += code_str[randint(0, 35)]
+        return code_
+
+
+class RegisterView(View):
+
+    def get(self, request):
+        return render(request, 'student/register.html')
+
+    def post(self, request):
+        stu_no = request.POST.get('stu_no')
+        stu_name = request.POST.get('stu_name')
+        stu_pwd =  request.POST.get('stu_pwd')
+        stu_tel =  request.POST.get('stu_tel')
+        stu_email =  request.POST.get('stu_email')
+        stu_major =  request.POST.get('stu_major')
+        stu_depart =  request.POST.get('stu_depart')
+        stu = Student(stu_no=stu_no, stu_name=stu_name, stu_pwd = stu_pwd, stu_tel = stu_tel, stu_email = stu_email,
+                      stu_major = stu_major, stu_depart = stu_depart, stu_avator='/upload/user/avator/student/default_avator.jpg')
+        stu.save()
+        return render(request, 'student/login.html', {'err_msg': '注册成功，请登录！'})
+
+
+class UploadStuView(View):
+
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        file = request.FILES.get('file')
+        errorlist = list()
+        file_path = settings.UPLOAD_ROOT + '\\user\\stu_info'
+        rand_name = 'stu_%s' % (datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[0:17])
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+        file_full_path = '%s\\%s%s' % (file_path, rand_name, os.path.splitext(file.name)[1])
+        try:
+            if file is None:
+                return JsonResponse({"code": 2, "msg": '请选择文件后再上传！', 'errorlist': errorlist})
+            # 循环二进制写入
+            with open(file_full_path, 'wb') as f:
+                for i in file.readlines():
+                    f.write(i)
+        except Exception as e:
+            return HttpResponse(e)
+        file = xlrd.open_workbook(file_full_path)
+        sheet_1 = file.sheet_by_index(0)
+        # report_name = sheet_1.row_values(2)  # 获取报表名称行数据
+        row_num = sheet_1.nrows  # 获取行数
+        # head_cols = sheet_1.row_values(0)
+        # head_dict = {col_index: "".join(str(head_cols[col_index]).split()) for col_index in range(5, len(head_cols))}
+
+        for i in range(1, row_num):  # 循环每一行数据
+            row = sheet_1.row_values(i)  # 获取行数据
+            if type(row[0]) is float:
+                stu_no = repr(row[0]).split(".")[0]
+            else:
+                stu_no = "".join(str(row[0]).split())
+            stu_name = "".join(str(row[1]).split())
+            try:
+                stu_list = Student.objects.filter(stu_no=stu_no)
+                if stu_list and len(stu_list) > 0:
+                    errorlist.append("%s: %s (已注册)<br/>" % (stu_no, stu_name))
+                    continue
+            except Exception as ex:
+                print(ex)
+                errorlist.append("%s: %s 服务器异常<br/>" % (stu_no, stu_name))
+            if type(row[0]) is float:
+                stu_pwd = repr(row[2]).split(".")[0]
+            else:
+                stu_pwd = "".join(str(row[2]).split())
+            if not stu_pwd:
+                stu_pwd = '123456'
+            if type(row[0]) is float:
+                stu_tel = repr(row[3]).split(".")[0]
+            else:
+                stu_tel = "".join(str(row[3]).split())
+            stu_email = "".join(str(row[4]).split())
+            stu_major = "".join(str(row[5]).split())
+            stu_depart = "".join(str(row[6]).split())
+            stu_avator = "/upload/user/avator/student/default_avator.jpg"
+            stu_temp = Student(stu_no=stu_no, stu_name=stu_name, stu_pwd=stu_pwd, stu_tel=stu_tel, stu_email=stu_email, stu_major=stu_major, stu_depart=stu_depart, stu_avator=stu_avator)
+            try:
+                stu_temp.save()
+            except Exception as ex:
+                print(ex)
+                errorlist.append("%s: %s 服务器异常<br/>" % (stu_no, stu_name))
+        response_data = {
+            "code": 6
+            , "msg": '解析完成！'
+            , 'errorlist': errorlist
+        }
+        return JsonResponse(response_data)
+
+
+class CheckStunoView(View):
+
+    def get(self, request):
+        stu_no = request.GET.get('stu_no')
+        if not stu_no:
+            return JsonResponse({"code": 2, "msg": '请输入学号！'})
+        try:
+            stu = Student.objects.filter(stu_no=stu_no)
+            if stu and len(stu) > 0:
+                return JsonResponse({"code": 2, "msg": '当前学号已经注册，请选择其他学号！'})
+        except Exception as ex:
+            print(ex)
+            return JsonResponse({"code": 2, "msg": '查询异常！'})
+        return JsonResponse({"code": 6, "msg": '学号合法！'})
+
+
+
+    def post(self, request):
+        pass

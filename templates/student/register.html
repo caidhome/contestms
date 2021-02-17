@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>兰州理工大学天梯赛-学生登录</title>
+    <link rel="stylesheet" href="{% static 'lib/layui/css/layui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body{
+            background: #333;
+            {#overflow-y: hidden;#}
+        }
+    </style>
+</head>
+<body>
+    <div class="login">
+        <div class="header">
+            <div class="headerRight">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <div class="loginBody">
+            <h1>Student register</h1>
+            <form method="post" action="" id="stu_log_form">
+                {% csrf_token %}
+                <div class="layui-container">
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe66f;</i>
+                        <div class="input">
+                            <input type="text" placeholder="学号" name="stu_no">
+                        </div>
+                    </div>
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe612;</i>
+                        <div class="input">
+                            <input type="text" placeholder="姓名" name="stu_name">
+                        </div>
+                    </div>
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe673;</i>
+                        <div class="input">
+                            <input type="password" placeholder="密码" name="stu_pwd">
+                        </div>
+                    </div>
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe673;</i>
+                        <div class="input">
+                            <input type="password" placeholder="确认密码" name="repwd">
+                        </div>
+                    </div>
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe678;</i>
+                        <div class="input">
+                            <input type="text" placeholder="电话" name="stu_tel">
+                        </div>
+                    </div>
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe64d;</i>
+                        <div class="input">
+                            <input type="text" placeholder="邮箱" name="stu_email">
+                        </div>
+                    </div>
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe66e;</i>
+                        <div class="input">
+                            <input type="text" placeholder="专业" name="stu_major">
+                        </div>
+                    </div>
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe613;</i>
+                        <div class="input">
+                            <input type="text" placeholder="学院" name="stu_depart">
+                        </div>
+                    </div>
+                </div>
+                <div style="color: red; padding-left: 25px;" id="err_msg">{{ err_msg }}</div>
+                <input type="hidden" name="next" value="{{ next }}">
+            </form>
+        </div>
+        <div class="footer" id="sub_btn">
+            <h1>注册</h1>
+        </div>
+    </div>
+
+    
+
+    <script src="{% static 'lib/layui/layui.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+    <script>
+        layui.use('form', function(){
+              var form = layui.form;
+              var $ = layui.jquery;
+              var stu_no_input_obj = $("input[name='stu_no']");
+              stu_no_input_obj.click(function () {
+                  $("#err_msg").text('')
+              })
+             stu_no_input_obj.blur(function () {
+                  if(stu_no_input_obj.val().trim().length > 0){
+                      $.ajax({
+                            url: '/user/checkstuno/',
+                            data: {'stu_no': stu_no_input_obj.val().trim()},
+                            dataType: "json",
+                            type: "GET",
+                            success: function (result) {
+                               layui.layer.msg(result.msg, {
+                                    icon: result.code,
+                                    time: 2000
+                                });
+                               if(result.code == 2)
+                                   stu_no_input_obj.val('')
+                            },
+                            error: function (res) {
+                                layer.alert('服务器错误！')
+                                $("#err_msg").text('服务器错误！')
+                            }
+                      });
+                  }
+              })
+              $("#sub_btn").click(function () {
+                  var sno = $("input[name='stu_no']").val()
+                  var pwd = $("input[name='stu_pwd']").val()
+                  var repwd = $("input[name='repwd']").val()
+                  var tel = $("input[name='stu_tel']").val()
+                  var email = $("input[name='stu_email']").val()
+                  var major = $("input[name='stu_major']").val()
+                  var depart = $("input[name='stu_depart']").val()
+
+                  if(sno.length <= 0 || pwd.length <= 0 || repwd.length <= 0|| tel.length <= 0|| email.length <= 0|| major.length <= 0|| depart.length <= 0){
+                      layui.layer.alert('您还未输入完整信息！', {icon: 2})
+                      return false;
+                  }
+                  /*
+                  (?!^\d+$) 排除bai全数字
+                    (?!^[a-zA-Z]+$) 排除全字母
+                    [0-9a-zA-Z]{4,23} 字符或字母4-23位，不考虑全为数字和全为字符情况。
+                  * */
+                  {#var reg_no = /(?!^\d+$)(?!^[a-zA-Z]+$)[0-9a-zA-Z]{4,23}/#}
+                  var reg_no = /[0-9a-zA-Z]{4,23}/
+                  if(!reg_no.test(sno)){
+                      layui.layer.alert('学号格式错误！', {icon: 2})
+                      return false;
+                  }
+                 if(pwd != repwd){
+                      layui.layer.alert('两次密码不一致！', {icon: 2})
+                      return false;
+                  }
+                  var reg_tel = /^1[34578]\d{9}$/;
+                 if(!reg_tel.test(tel)){
+                      layui.layer.alert('电话格式错误！', {icon: 2})
+                      return false;
+                  }
+                  var reg_email = /\w+[@]{1}\w+[.]\w+/;
+                 if(!reg_email.test(email)){
+                      layui.layer.alert('邮箱格式错误！', {icon: 2})
+                      return false;
+                  }
+
+                  $("#stu_log_form").submit()
+              })
+        });
+
+    </script>
+</body>
+</html>

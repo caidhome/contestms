@@ -59,41 +59,41 @@
                             </form>
                         </div>
                         <div class="layui-card-header">
-                            <button class="layui-btn layui-btn-danger" onclick="delAll()">
-                                <i class="layui-icon"></i>批量删除</button>
+                            {% comment %}<button class="layui-btn layui-btn-danger" onclick="delAll()">
+                                <i class="layui-icon"></i>批量删除</button>{% endcomment %}
                             <button class="layui-btn" onclick="xadmin.open('添加用户','/contest/add',800,600)">
                                 <i class="layui-icon"></i>添加</button></div>
                         <div class="layui-card-body ">
                             <table class="layui-table layui-form cus_con_table">
                                 <thead>
                                     <tr>
-                                        <th width="4%">
+                                        {% comment %}<th width="4%">
                                             <input type="checkbox" name="" lay-skin="primary">
-                                        </th>
+                                        </th>{% endcomment %}
                                         <th width="6%">编号</th>
-                                        <th width="16%">名称</th>
-                                        <th width="8%">竞赛时间</th>
-                                        <th width="8%">报名时间</th>
-                                        <th width="8%">截至时间</th>
-                                        <th width="8%">场地</th>
+                                        <th width="12%">名称</th>
+                                        <th width="12%">竞赛时间</th>
+                                        <th width="12%">报名时间</th>
+                                        <th width="12%">截至时间</th>
+                                        <th width="6%">场地</th>
                                         <!--<th>规则</th>-->
-                                        <th width="8%">环境</th>
-                                        <th width="8%">语言</th>
+                                        <th width="6%">环境</th>
+                                        <th width="6%">语言</th>
                                         <th width="6%">级别</th>
-                                        <th width="8%">报名链接</th>
+                                        <th width="6%">报名链接</th>
                                         <th width="6%">证书</th>
-                                        <th width="6%">操作</th></tr>
+                                        <th width="10%">操作</th></tr>
                                 </thead>
                                 <tbody>
                                     {% for con in res %}
                                     <tr>
-                                        <td style="width: 1%;">
-                                            <input type="checkbox" name="con_id" lay-skin="primary"></td>
+                                        {% comment %}<td style="width: 1%;">
+                                            <input type="checkbox" name="con_id" lay-skin="primary"></td>{% endcomment %}
                                         <td>{{ con.con_id }}</td>
                                         <td class="cus_con_td" id="con_name_{{ con.con_id }}">{{ con.con_name }}</td>
-                                        <td>{{ con.con_time|date:"Y-m-d H:i:s" }}</td>
-                                        <td>{{ con.con_signtime|date:"Y-m-d H:i:s" }}</td>
-                                        <td>{{ con.con_endtime|date:"Y-m-d H:i:s" }}</td>
+                                        <td>{{ con.con_time|date:"Y/m/d H:i:s" }}</td>
+                                        <td>{{ con.con_signtime|date:"Y/m/d H:i:s" }}</td>
+                                        <td>{{ con.con_endtime|date:"Y/m/d H:i:s" }}</td>
                                         <td class="cus_con_td">{{ con.con_place }}</td>
                                         <td class="cus_con_td">{{ con.con_environ }}</td>
                                         <td class="cus_con_td">{{ con.con_lang }}</td>
@@ -106,7 +106,9 @@
                                             <a title="删除" onclick="member_del(this,'{{ con.con_id }}')" href="javascript:;">
                                                 <i class="layui-icon">&#xe640;</i></a>
                                             <a title="查看" onclick="show_contest('{{ con.con_id }}')" href="javascript:;">
-                                                 <i class="icon iconfont">&#xe744;</i></a>
+                                                 <i class="layui-icon">&#xe649;</i></a>
+                                            <a title="发通知" onclick="send_notice('{{ con.con_id }}')" href="javascript:;">
+                                                 <i class="layui-icon">&#xe667;</i></a>
                                         </td>
                                     </tr>
                                     {%empty%}
@@ -146,6 +148,7 @@
         layui.use(['laydate', 'form'],
         function() {
             var laydate = layui.laydate;
+            var $ = layui.$;
             //执行一个laydate实例
             laydate.render({
                 elem: '#start' //指定元素
@@ -156,6 +159,8 @@
                 elem: '#end' //指定元素
                 ,type: 'datetime'
             });
+
+
         });
 
 
@@ -229,6 +234,25 @@
                 });
                 $(".layui-form-checked").not('.header').parents('tr').remove();
             });
-        }</script>
+        }
+
+        function send_notice(cid) {
+            layui.$.ajax({
+                    url: '/contest/sendnotice/'+cid+'/',
+                    data: {'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()},
+                    dataType: "json",
+                    type: "POST",
+                    success: function (result) {
+                       layui.layer.msg(result.msg, {
+                            icon: result.code,
+                            time: 2000
+                        });
+                    },
+                    error: function (res) {
+                        layer.alert('服务器错误！')
+                    }
+              });
+        }
+    </script>
 
 </html>

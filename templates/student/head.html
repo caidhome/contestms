@@ -53,11 +53,18 @@
 {#                            </a>#}
 {#                        </div>#}
                         <div class="user-info">
+                            {% if request.session.login_user %}
                             <img class="photo" src="/static{{ request.session.login_user.stu_avator }}">
-                            <p class="name"><a href="/user/student/{{ request.session.login_user.stu_id }}/"  target="_blank">{{ request.session.login_user.stu_name }}</a></p>
+                            <p class="my_top"><a href="/user/student/{{ request.session.login_user.stu_id }}/"  target="_blank">{{ request.session.login_user.stu_name }}</a></p>
                              <p class="my_top">
                                 <a href="javascript:void(0);" onclick="logout()">注销</a>
                             </p>
+                            {% else %}
+                             <p class="my_top"><a href="javascript:window.top.location.href='/user/login';">登录</a></p>
+                             <p class="my_top">
+                                <a href="javascript:window.top.location.href='/user/register';">注册</a>
+                            </p>
+                            {% endif %}
                         </div>
                     </div>
                 </li>

@@ -16,7 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from userms.views import Stu_LoginView, Admin_LoginView, LogoutView, ListView, AddView, UploadAvatorView, \
-    ResetpwdView, DelView, Admin_PersonView, Stu_Query_PersonView, Stu_PersonView, Stu_InfoView, Email_code_APIView, StuUpdateInfo
+    ResetpwdView, DelView, Admin_PersonView, Stu_Query_PersonView, Stu_PersonView, Stu_InfoView, \
+    Email_code_APIView, StuUpdateInfo, RegisterView, UploadStuView, CheckStunoView
 
 urlpatterns = [
     re_path('^login$', Stu_LoginView.as_view(), name='login'),
@@ -33,4 +34,7 @@ urlpatterns = [
     re_path('^stu_info$', Stu_InfoView.as_view(), name='stu_info'),
     re_path('^codeapi$', Email_code_APIView.as_view(), name='codeapi'),
     re_path('^stueditinfo$', StuUpdateInfo.as_view(), name='stueditinfo'),
+    re_path('^register$', RegisterView.as_view(), name='stueditinfo'),
+    re_path('^uploadstuinfo$', UploadStuView.as_view(), name='uploadstuinfo'),
+    re_path('^checkstuno/$', CheckStunoView.as_view(), name='checkstuno'),
 ]

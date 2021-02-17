@@ -29,16 +29,16 @@
                 <div class="layui-col-md12">
                     <div class="layui-card">
                         <div class="layui-card-header">
-                            <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量删除</button>
+{#                            <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量删除</button>#}
                             <button class="layui-btn" onclick="xadmin.open('添加证书','/cert/add','','',true)"><i class="layui-icon"></i>添加</button>
                         </div>
                         <div class="layui-card-body ">
                             <table class="layui-table layui-form">
                               <thead>
                                 <tr>
-                                  <th>
+                                  {% comment %}<th>
                                     <input type="checkbox" name=""  lay-skin="primary">
-                                  </th>
+                                  </th>{% endcomment %}
                                   <th>ID</th>
                                   <th>模板</th>
                                   <th>名称</th>
@@ -47,16 +47,13 @@
                               <tbody>
                               {% for cert in res %}
                                 <tr>
-                                  <td>
+                                  {% comment %}<td>
                                     <input type="checkbox" name="cert_id"  lay-skin="primary">
-                                  </td>
+                                  </td>{% endcomment %}
                                   <td>{{ cert.cert_id }}</td>
                                   <td><img style="height:70px;width:70px;line-height:50px!important;" src="/static{{ cert.cert_imgurl }}"></td>
                                     <td>{{ cert.cert_name }}</td>
                                   <td class="td-manage">
-                                    <a onclick="member_resetpwd(this,'{{ cert.cert_id }}')" href="javascript:;"  title="重置密码">
-                                      <i class="layui-icon">&#xe601;</i>
-                                    </a>
                                     <a title="编辑"  onclick="xadmin.open('编辑证书','/cert/add?cert_id={{ cert.cert_id }}','','',true)" href="javascript:;">
                                       <i class="layui-icon">&#xe642;</i>
                                     </a>
