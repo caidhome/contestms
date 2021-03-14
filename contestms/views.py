@@ -11,7 +11,7 @@ from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django_redis import get_redis_connection
 from reportlab.lib.pagesizes import portrait
 from reportlab.pdfgen import canvas
-from contestms.models import Contest, Sign, Cert
+from contestms.models import Contest, Sign, Cert, Group
 from userms.models import Admin, Student
 from django.http import JsonResponse
 from TiantiMS import settings
@@ -194,9 +194,9 @@ class DetialView(View):
     @xframe_options_sameorigin
     def get(self, request, cid):
         is_login = request.session.get('is_login')
-        # login_user = request.session.get('login_user')
-        # if not is_login or not login_user or is_login == 0:
-        #     return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请登录后重试。', 'next': '/contest/detial/%s/'%cid})
+        login_user = request.session.get('login_user')
+        if not is_login or not login_user or is_login not in [1, 2, 3]:
+            return render(request, 'admin/user/login.html', {'err_msg': '您当前还未登录，请登录后重试。', 'next': '/contest/detial/%s/'%cid})
 
         contest = None
         try:
@@ -210,7 +210,15 @@ class DetialView(View):
             print(ex)
         cur_sign = None
         if is_login and is_login in [1, 2]:
-            return render(request, 'admin/contest/contest_detial.html', {'con': contest})
+            groups = Group.objects.filter(group_conid=contest.con_id)
+            group_dict = dict()
+            for group in groups:
+                sign_list = Sign.objects.filter(sign_groupid=group.group_conid_id)
+                stu_list = list()
+                for sign in sign_list:
+                    stu_list.append(Student.objects.get(stu_id=sign.sign_stuid_id))
+                group_dict[group] = stu_list
+            return render(request, 'admin/contest/contest_detial.html', {'con': contest, 'group_dict': group_dict})
         else:
             stu = None
             login_user = request.session.get('login_user')
@@ -354,62 +362,70 @@ class UploadScoreView(View):
                     f.write(i)
         except Exception as e:
             return HttpResponse(e)
-        file = xlrd.open_workbook(file_full_path)
-        sheet_1 = file.sheet_by_index(0)
-        # report_name = sheet_1.row_values(2)  # 获取报表名称行数据
-        row_num = sheet_1.nrows  # 获取行数
-        head_cols = sheet_1.row_values(0)
-        head_dict = {col_index: "".join(str(head_cols[col_index]).split()) for col_index in range(5, len(head_cols))}
-        report_num = sheet_1.ncols  # 获取列数
-        cur_con = Contest.objects.get(con_id=con_id)
+        try:
+            file = xlrd.open_workbook(file_full_path)
+            sheet_1 = file.sheet_by_index(0)
+            # report_name = sheet_1.row_values(2)  # 获取报表名称行数据
 
-        for i in range(1, row_num):  # 循环每一行数据
-            row = sheet_1.row_values(i)  # 获取行数据
-            stu_no = int(row[0])
-            print(stu_no)
-            stu_name = "".join(str(row[1]).split())
-            stu_depart = "".join(str(row[2]).split())
-            stu_major = "".join(str(row[3]).split())
-            stu_teach = "".join(str(row[4]).split())
-            # print('no:', stu_no, 'name: ', stu_name, 'depart: ', stu_depart, 'major: ', stu_major)
-            cur_stu_list = Student.objects.filter(stu_no=stu_no, stu_name=stu_name, stu_depart=stu_depart, stu_major=stu_major)
-            # print(cur_stu_list)
-            # print(cur_stu_list.query.__str__())
-            # print(len(cur_stu_list))
-            score_str = "".join(str(row[5]).split())
-            score_level = "".join(str(row[6]).split())
-            if not cur_stu_list or len(cur_stu_list) <= 0:
-                errorlist.append("%d:%s,总分：%s (数据库无此人）<br/>" % (stu_no, stu_name, score_str))
-                continue
-            cur_stu = cur_stu_list[0]
-            sign_list = Sign.objects.filter(sign_stuid=cur_stu, sign_conid=cur_con)
-            # 缺考为：-1， 上传失败为：-2，
-            if len(sign_list) > 0:
-                total_score = -5
-                cur_sign = sign_list[0]
-                try:
-                    if score_str == '缺考':
-                        total_score = -1
-                    else:
-                        total_score = float(score_str)
-                except Exception as ex:
-                    total_score = -2
-                    print(ex)
-                    errorlist.append("%d:%s,总分数据为：%s（数据格式错误）<br/>" % (stu_no, stu_name, score_str))
-                detial = ''
-                for item in range(7, len(row)):
-                    itemstr = head_dict[item] + '=' + "".join(str(row[item]).split())+'&'
-                    detial = detial + itemstr
-                cur_sign.sign_detial = detial[:-1]
-                cur_sign.sign_total = total_score
-                cur_sign.sign_state = 3
-                if stu_teach:
-                    cur_sign.sign_teach = stu_teach
-                if score_level:
-                    cur_sign.sign_level = score_level
-                cur_sign.save()
-            else:
-                errorlist.append("%d:%s,总分：%s (该学生未报名该竞赛）<br/>" % (stu_no, stu_name, score_str))
+            row_num = sheet_1.nrows  # 获取行数
+            head_cols = sheet_1.row_values(0)
+            head_dict = {col_index: "".join(str(head_cols[col_index]).split()) for col_index in range(5, len(head_cols))}
+            report_num = sheet_1.ncols  # 获取列数
+            print(report_num)
+            if report_num != 10:
+                return JsonResponse({"code": 2, "msg": '上传失败，模板错误，请先下载模板并按模板指定内容格式上传！', 'errorlist': None})
+            cur_con = Contest.objects.get(con_id=con_id)
+
+            for i in range(1, row_num):  # 循环每一行数据
+                row = sheet_1.row_values(i)  # 获取行数据
+                stu_no = int(row[0])
+                print(stu_no)
+                stu_name = "".join(str(row[1]).split())
+                stu_depart = "".join(str(row[2]).split())
+                stu_major = "".join(str(row[3]).split())
+                stu_teach = "".join(str(row[4]).split())
+                # print('no:', stu_no, 'name: ', stu_name, 'depart: ', stu_depart, 'major: ', stu_major)
+                cur_stu_list = Student.objects.filter(stu_no=stu_no, stu_name=stu_name, stu_depart=stu_depart, stu_major=stu_major)
+                # print(cur_stu_list)
+                # print(cur_stu_list.query.__str__())
+                # print(len(cur_stu_list))
+                score_str = "".join(str(row[5]).split())
+                score_level = "".join(str(row[6]).split())
+                if not cur_stu_list or len(cur_stu_list) <= 0:
+                    errorlist.append("%d:%s,总分：%s (数据库无此人）<br/>" % (stu_no, stu_name, score_str))
+                    continue
+                cur_stu = cur_stu_list[0]
+                sign_list = Sign.objects.filter(sign_stuid=cur_stu, sign_conid=cur_con)
+                # 缺考为：-1， 上传失败为：-2，
+                if len(sign_list) > 0:
+                    total_score = -5
+                    cur_sign = sign_list[0]
+                    try:
+                        if score_str == '缺考':
+                            total_score = -1
+                        else:
+                            total_score = float(score_str)
+                    except Exception as ex:
+                        total_score = -2
+                        print(ex)
+                        errorlist.append("%d:%s,总分数据为：%s（数据格式错误）<br/>" % (stu_no, stu_name, score_str))
+                    detial = ''
+                    for item in range(7, len(row)):
+                        itemstr = head_dict[item] + '=' + "".join(str(row[item]).split())+'&'
+                        detial = detial + itemstr
+                    cur_sign.sign_detial = detial[:-1]
+                    cur_sign.sign_total = total_score
+                    cur_sign.sign_state = 3
+                    if stu_teach:
+                        cur_sign.sign_teach = stu_teach
+                    if score_level:
+                        cur_sign.sign_level = score_level
+                    cur_sign.save()
+                else:
+                    errorlist.append("%d:%s,总分：%s (该学生未报名该竞赛）<br/>" % (stu_no, stu_name, score_str))
+        except Exception as ex:
+            print(ex)
+            return JsonResponse({"code": 2, "msg": '上传失败，服务器错误！', 'errorlist': None})
         response_data = {
             "code": 6
             , "msg": '上传成功！'
@@ -834,3 +850,113 @@ class SendNoticeView(View):
 
 
 
+
+
+
+
+
+# group 管理
+class GroupListView(View):
+
+    @xframe_options_sameorigin
+    def get(self, request):
+        is_login = request.session.get('is_login')
+        login_user = request.session.get('login_user')
+        if not is_login or not login_user or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前还未登录或登录权限不够，请重先登录！', 'next': '/contest/group/list'})
+        res = Group.objects.all().order_by('group_conid__con_id')
+        pIndex = request.GET.get('cpage')
+        if not pIndex:
+            pIndex = 1
+        paginator = Paginator(res, 10)
+        try:
+            # page对象
+            list_page = paginator.page(pIndex)
+        except PageNotAnInteger:
+            list_page = paginator.page(1)
+        except EmptyPage:
+            list_page = paginator.page(paginator.num_pages)
+        if not pIndex:
+            pIndex = '1'
+        pIndex = int(pIndex)
+
+        totol_page = paginator.page_range
+        rep_data = {
+            'res': list_page,
+            'tpage': len(totol_page),
+            'cpage': pIndex,
+            'filt': {
+            }
+        }
+        return render(request, 'admin/group/group_list.html', rep_data)
+
+
+    def post(self, request):
+        pass
+
+
+class GroupAddView(View):
+
+    @xframe_options_sameorigin
+    def get(self, request):
+        group_id = request.GET.get("group_id")
+        group = None
+        if group_id:
+            group = Group.objects.get(group_id=group_id)
+        con_list = Contest.objects.all()
+        return render(request, 'admin/group/group_add.html', {'con_list': con_list, 'group': group})
+
+    def post(self, request):
+        msg = '添加成功！'
+        group_id = request.POST.get("group_id")
+        group_name = request.POST.get("group_name")
+        group_conid = request.POST.get('group_conid')
+        group = Group(group_name=group_name, group_conid_id=group_conid)
+        if group_id:
+            group.group_id = group_id
+            msg = '更新成功！'
+        group.save()
+        return JsonResponse({'code': 6, 'msg': msg})
+
+
+class GroupDelView(View):
+
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        gid = request.POST.get('group_id')
+        try:
+            group = Group.objects.get(group_id=gid)
+            group.delete()
+            code = 6
+            msg = '删除成功'
+        except Exception as ex:
+            code = 2
+            print(ex)
+            msg = '删除失败'
+        response_data = {
+            "code": code
+            , "msg": msg
+        }
+        return JsonResponse(response_data)
+
+class GroupManageView(View):
+
+    @xframe_options_sameorigin
+    def get(self, request, gid):
+        is_login = request.session.get('is_login')
+        login_user_sess = request.session.get('login_user')
+        if not is_login or not login_user_sess or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请登录后重试。', 'next': '/contest/list'})
+        group = Group.objects.get(group_id=gid)
+        sign_list = Sign.objects.filter(sign_groupid=gid)
+        stu_list = list()
+        for sign in sign_list:
+            stu_list.append(Student.objects.get(stu_id=sign.sign_stuid_id))
+        return render(request, 'admin/group/group_manage.html', {'group': group, 'stu_list': stu_list})
+
+    def post(self, request):
+        pass

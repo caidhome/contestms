@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    {% load filters %}
+    <head>
+        {% load static %}
+        <meta charset="UTF-8">
+        <title>添加分组-天梯赛后台管理系统</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="{% static 'css/font.css' %}">
+        <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
+        <!-- <link rel="stylesheet" href="./css/theme5.css"> -->
+        <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
+        <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
+    </head>
+    
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form" method="post" id="group_add_form" lay-filter="component-form-element">
+                {% csrf_token %}
+                    <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>分组名称</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="username" name="group_name" required="" lay-verify="required" autocomplete="off" class="layui-input" value="{{ group.group_name }}"></div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>竞赛级别</label>
+                        <div class="layui-input-inline">
+                            <select id="shipping" name="group_conid" class="valid">
+                                <option value="">--请选择分组所属竞赛--</option>
+                            {% for con in con_list %}
+                                <option value="{{ con.con_id }}" {% if group.group_conid.con_id == con.con_id %}selected{% endif %}>{{ con.con_name }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label for="L_repass" class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="component-form-element" lay-submit="">
+                            {% if group.group_id %}更新{% else %}增加{% endif %}
+                        </button>
+                    </div>
+                <input type="hidden" name="group_id" value="{{ group.group_id }}">
+                </form>
+            </div>
+        </div>
+        <script>layui.use(['laydate', 'form', 'layer', 'layedit'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer,
+                layedit = layui.layedit,
+                laydate = layui.laydate;
+
+                //监听提交
+                form.on('submit(component-form-element)',
+                function(data) {
+                    {#layer.alert(JSON.stringify(data.field));#}
+                    var data = $('#group_add_form').serialize()
+                    $.ajax({
+                        url: '/contest/group/add',
+                        data: data,
+                        dataType: "json",
+                        type: "POST",
+                        success: function (result) {
+                            if (result.code === 6) {
+                            layer.alert(result.msg, {
+                                    icon: result.code
+                                },
+                                function() {
+                                    parent.location.reload(true);
+                                    // 获得frame索引
+                                    var index = parent.layer.getFrameIndex(window.name);
+                                    console.log(index)
+                                    //关闭当前frame
+                                    parent.layer.close(index);
+                                });
+                            } else {
+                                layer.alert(result.msg, {
+                                    icon: result.code
+                                });
+                            }
+                        }
+                    });
+                    return false;
+                });
+
+            });</script>
+    </body>
+
+</html>

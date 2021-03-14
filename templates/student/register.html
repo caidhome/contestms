@@ -60,6 +60,20 @@
                         </div>
                     </div>
                     <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe658;</i>
+                        <div class="input">
+                            <input type="text" placeholder="身份证" name="stu_card">
+                        </div>
+                    </div>
+                    <div class="loginAccount">
+                            <i class="icon layui-icon">&#xe60c;</i>
+                        <div class="input">
+                            <input type="radio" value="F" name="stu_sex" style="width: 30%; height: 20px;" checked> <span style="font-size: 20px;">男</span>
+                            <input type="radio" value="M" name="stu_sex" style="width: 30%; height: 20px;"> <span style="font-size: 20px;">女</span>
+                        </div>
+                    </div>
+
+                    <div class="loginAccount">
                         <i class="icon layui-icon">&#xe64d;</i>
                         <div class="input">
                             <input type="text" placeholder="邮箱" name="stu_email">
@@ -75,6 +89,12 @@
                         <i class="icon layui-icon">&#xe613;</i>
                         <div class="input">
                             <input type="text" placeholder="学院" name="stu_depart">
+                        </div>
+                    </div>
+                    <div class="loginAccount">
+                        <i class="icon layui-icon">&#xe63a;</i>
+                        <div class="input">
+                            <input type="text" placeholder="宣言" name="stu_motto">
                         </div>
                     </div>
                 </div>
@@ -129,8 +149,12 @@
                   var email = $("input[name='stu_email']").val()
                   var major = $("input[name='stu_major']").val()
                   var depart = $("input[name='stu_depart']").val()
+                  var sex = $("input[name='stu_sex']").val()
+                  var motto = $("input[name='stu_motto']").val()
+                  var card = $("input[name='stu_card']").val()
 
-                  if(sno.length <= 0 || pwd.length <= 0 || repwd.length <= 0|| tel.length <= 0|| email.length <= 0|| major.length <= 0|| depart.length <= 0){
+                  if(sno.length <= 0 || pwd.length <= 0 || repwd.length <= 0|| tel.length <= 0|| email.length <= 0||
+                      major.length <= 0|| depart.length <= 0|| motto.length <= 0|| card.length <= 0){
                       layui.layer.alert('您还未输入完整信息！', {icon: 2})
                       return false;
                   }
@@ -159,7 +183,11 @@
                       layui.layer.alert('邮箱格式错误！', {icon: 2})
                       return false;
                   }
-
+                 var reg_card = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+                if(!reg_card.test(card)){
+                      layui.layer.alert('身份证格式错误！', {icon: 2})
+                      return false;
+                  }
                   $("#stu_log_form").submit()
               })
         });

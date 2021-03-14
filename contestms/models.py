@@ -21,6 +21,15 @@ class Contest(models.Model):
         managed = True
         db_table = 'tt_contest'
 
+class Group(models.Model):
+    group_id = models.IntegerField(primary_key=True)
+    group_name = models.CharField(max_length=20)
+    group_conid = models.ForeignKey(Contest, models.DO_NOTHING, db_column='group_conid')
+
+    class Meta:
+        managed = True
+        db_table = 'tt_group'
+
 
 class Sign(models.Model):
     sign_id = models.IntegerField(primary_key=True)
@@ -33,6 +42,7 @@ class Sign(models.Model):
     sign_teach = models.CharField(max_length=50, blank=True, null=True)
     sign_conid = models.ForeignKey(Contest, models.DO_NOTHING, db_column='sign_conid')
     sign_stuid = models.ForeignKey(Student, models.DO_NOTHING, db_column='sign_stuid')
+    sign_groupid = models.ForeignKey(Group, models.DO_NOTHING, db_column='sign_groupid', blank=True)
 
     class Meta:
         managed = True

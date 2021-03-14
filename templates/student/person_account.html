@@ -32,6 +32,19 @@
                                 </div>
                             </div>
                             <div class="layui-form-item">
+                                <label for="username" class="layui-form-label">
+                                    <span class="x-red"></span>性别
+                                </label>
+                                <div class="layui-form-mid layui-word-aux">
+                                    {% if stu.stu_sex == 'M' %}
+                                        女
+                                     {% else %}
+                                        男
+                                    {% endif %}
+
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
                                 <label for="L_pass" class="layui-form-label">
                                     <span style="color: red;">*</span>密码
                                 </label>
@@ -72,6 +85,14 @@
                                     <input type="text" name="stu_email" required="" lay-verify="email"
                                            value="{{ stu.stu_email }}"
                                            autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                             <div class="layui-form-item">
+                                <label for="username" class="layui-form-label">
+                                    <span class="x-red"></span>身份证
+                                </label>
+                                <div class="layui-form-mid layui-word-aux">
+                                    {{ stu.stu_card }}
                                 </div>
                             </div>
                             <div class="layui-form-item">

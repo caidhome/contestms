@@ -63,10 +63,10 @@ class Stu_LoginView(View):
             stu = user[0]
             stu = {'stu_id': stu.stu_id, 'stu_name': stu.stu_name, 'stu_tel': stu.stu_tel, 'stu_email': stu.stu_email,
                    'stu_major': stu.stu_major, 'stu_depart': stu.stu_depart, 'stu_no': stu.stu_no,
-                   'stu_avator': stu.stu_avator}
+                   'stu_avator': stu.stu_avator, 'stu_sex': stu.stu_sex, 'stu_card': stu.stu_card, 'stu_motto': stu.stu_motto}
             request.session['is_login'] = 3  # 这个session是用于后面访问每个页面（即调用每个视图函数时要用到，即判断是否已经登录，用此判断）
             request.session['login_user'] = stu
-            print(next)
+            # print(next)
             if next and next != 'None':
                 return HttpResponseRedirect(next)
             return HttpResponseRedirect('/')
@@ -286,6 +286,9 @@ class AddView(View):
             stu_tel = request.POST.get("stu_tel")
             stu_email = request.POST.get("stu_email")
             stu_avator = request.POST.get("stu_avator")
+            stu_sex = request.POST.get("stu_sex")
+            stu_motto = request.POST.get("stu_motto")
+            stu_card = request.POST.get("stu_card")
             stu_id = request.POST.get("stu_id")
             stu = Student()
             if stu_id:
@@ -313,6 +316,12 @@ class AddView(View):
                 stu.stu_tel = stu_tel
             if stu_email:
                 stu.stu_email = stu_email
+            if stu_sex:
+                stu.stu_sex = stu_sex
+            if stu_motto:
+                stu.stu_motto = stu_motto
+            if stu_card:
+                stu.stu_card = stu_card
             stu.save()
             res_data = {"code": 6, "msg": msg}
         return JsonResponse(res_data)
@@ -342,7 +351,7 @@ class UploadAvatorView(View):
 
         file = request.FILES.get('file')
         fpath = request.POST.get('fpath')
-        print(fpath)
+        # print(fpath)
         if not fpath:
             flag = True
             fpath = '/temp/%s'%os.path.splitext(file.name)[1][1:]
@@ -428,7 +437,7 @@ class Stu_Query_PersonView(View):
             stu = Student.objects.get(stu_no=user_id)
             stu = {'stu_id': stu.stu_id, 'stu_name': stu.stu_name, 'stu_tel': stu.stu_tel, 'stu_email': stu.stu_email,
                    'stu_major': stu.stu_major, 'stu_depart': stu.stu_depart, 'stu_no': stu.stu_no,
-                   'stu_avator': stu.stu_avator}
+                   'stu_avator': stu.stu_avator, 'stu_sex': stu.stu_sex, 'stu_card': stu.stu_card, 'stu_motto': stu.stu_motto}
             res_data = {"code": 6, "msg": "查询成功", 'stu': stu}
         except Exception as ex:
             print(ex)
@@ -578,6 +587,12 @@ class StuUpdateInfo(View):
             stu_pwd = request.POST.get('stu_pwd')  # 获取前端邮箱
             stu_tel = request.POST.get('stu_tel')  # 获取前段的验证码
             stu_email = request.POST.get('stu_email')  # 获取前段的验证码
+            stu_avator = request.POST.get('stu_avator')  # 获取前段的验证码
+            if stu_avator and stu_avator != stu.stu_avator:
+                file_full_path = '%s\\user\\avator\\student\\%s' % (settings.UPLOAD_ROOT, stu.stu_avator.split('/')[-1])
+                if stu.stu_avator.split('/')[-1] != 'default_avator.jpg' and os.path.exists(file_full_path):
+                    os.remove(file_full_path)
+                stu.stu_avator= stu_avator
             if stu_pwd:
                 stu.stu_pwd = stu_pwd
             if stu_tel:
@@ -585,6 +600,12 @@ class StuUpdateInfo(View):
             if stu_email:
                 stu.stu_email = stu_email
             stu.save()
+
+            login_user['stu_tel'] = stu_tel
+            login_user['stu_email'] = stu_email
+            login_user['stu_avator'] = stu_avator
+
+            request.session['login_user'] = login_user
             return JsonResponse({'code':6 ,'msg':'修改成功！'})
         return JsonResponse({'code':2,'msg':'验证码错误'})
         #返回错误信息
@@ -667,8 +688,12 @@ class RegisterView(View):
         stu_email =  request.POST.get('stu_email')
         stu_major =  request.POST.get('stu_major')
         stu_depart =  request.POST.get('stu_depart')
+        stu_sex =  request.POST.get('stu_sex')
+        stu_card =  request.POST.get('stu_card')
+        stu_motto =  request.POST.get('stu_motto')
         stu = Student(stu_no=stu_no, stu_name=stu_name, stu_pwd = stu_pwd, stu_tel = stu_tel, stu_email = stu_email,
-                      stu_major = stu_major, stu_depart = stu_depart, stu_avator='/upload/user/avator/student/default_avator.jpg')
+                      stu_major=stu_major, stu_depart=stu_depart, stu_avator='/upload/user/avator/student/default_avator.jpg',
+                      stu_sex=stu_sex, stu_card=stu_card, stu_motto=stu_motto)
         stu.save()
         return render(request, 'student/login.html', {'err_msg': '注册成功，请登录！'})
 
@@ -731,7 +756,13 @@ class UploadStuView(View):
             stu_major = "".join(str(row[5]).split())
             stu_depart = "".join(str(row[6]).split())
             stu_avator = "/upload/user/avator/student/default_avator.jpg"
-            stu_temp = Student(stu_no=stu_no, stu_name=stu_name, stu_pwd=stu_pwd, stu_tel=stu_tel, stu_email=stu_email, stu_major=stu_major, stu_depart=stu_depart, stu_avator=stu_avator)
+            stu_card = "".join(str(row[7]).split())
+            stu_motto = "".join(str(row[8]).split())
+            stu_sex = "".join(str(row[9]).split())
+
+            stu_temp = Student(stu_no=stu_no, stu_name=stu_name, stu_pwd=stu_pwd, stu_tel=stu_tel, stu_email=stu_email,
+                               stu_major=stu_major, stu_depart=stu_depart, stu_avator=stu_avator, stu_motto=stu_motto,
+                               stu_card=stu_card, stu_sex=stu_sex)
             try:
                 stu_temp.save()
             except Exception as ex:

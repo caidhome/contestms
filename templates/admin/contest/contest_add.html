@@ -137,17 +137,46 @@
                      }
                  });
 
-                laydate.render({
+                var start_obj = laydate.render({
                     elem: '#start' //指定元素
                     ,type: 'datetime'
+                    ,min: 'nowTime'
+                    ,done: function (value, date) {
+                        if (value != "") {
+                            {#date.datetime = date.month - 1;#}
+                            end_obj.config.max = {
+                                year: date.year,
+                                month: date.month - 1,
+                                date: date.date,
+                                hours: date.hours,
+                                minutes: date.minutes,
+                                seconds: date.seconds
+                            };
+                        }
+                    }
                 });
-                laydate.render({
+                var end_obj = laydate.render({
                     elem: '#end' //指定元素
                     ,type: 'datetime'
+                    ,min: 'nowTime'
                 });
-                laydate.render({
+                var con_obj = laydate.render({
                     elem: '#con_time' //指定元素
                     ,type: 'datetime'
+                    ,min: 'nowTime'
+                    ,done: function (value, date) {
+                        if (value != "") {
+                            {#date.datetime = date.month - 1;#}
+                            start_obj.config.max = {
+                                year: date.year,
+                                month: date.month - 1,
+                                date: date.date,
+                                hours: date.hours,
+                                minutes: date.minutes,
+                                seconds: date.seconds
+                            };
+                        }
+                    }
                 });
 
                 //监听提交

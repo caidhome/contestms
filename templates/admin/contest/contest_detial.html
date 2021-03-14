@@ -84,6 +84,22 @@
           </li>
         </ul>
             <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px; text-align: center">
+              <legend>分组</legend>
+            </fieldset>
+            {% for gitem, stu_list in group_dict.items %}
+            <blockquote class="layui-elem-quote">
+                {{ gitem.group_name }} &nbsp;&nbsp;&nbsp;&nbsp;
+              <a class="layui-btn layui-btn-normal layui-btn-sm" onclick="xadmin.open('管理分组','/contest/group/manage/{{ gitem.group_id }}/')" href="javascript: void(0);">管理</a>
+            </blockquote>
+            <div>
+                {% for stu_item in stu_list %}
+                    <button type="button" class="layui-btn layui-btn-primary layui-btn-radius">{{ stu_item.stu_name }}</button>
+                    {% empty %}
+                    <div style="padding: 10px 4px;margin: 10px 4px;">该组暂无添加任何学生。</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px; text-align: center">
               <legend>报名数据</legend>
             </fieldset>
             <button type="button" class="layui-btn" id="test3"><i class="layui-icon layui-icon-upload"></i>导入成绩</button>
@@ -147,13 +163,20 @@
             , url: '/contest/upload_score' //改成您自己的上传接口
             , data: {'con_id': '{{con.con_id}}', 'csrfmiddlewaretoken': csrf_data}
             , accept: 'file' //普通文件
-            , ext: '.xlsx'
+            , exts: 'xls|excel|xlsx'
             , done: function (res) {
-                var alert_info = res.msg
-                if(res.errorlist.length > 0)
-                   alert_info = alert_info+"<br/>上传失败名单：<hr/>"+res.errorlist
-                layer.alert(alert_info, {icon: res.code})
-                 layui.table.reload('test', {})
+                if(res.code == 2)
+                    layer.alert(res.msg, {icon: res.code})
+                else{
+                    var alert_info = res.msg
+                    if(res.errorlist.length > 0)
+                       alert_info = alert_info+"<br/>上传失败名单：<hr/>"+res.errorlist
+                    layer.alert(alert_info, {icon: res.code})
+                    layui.table.reload('test', {})
+                }
+            }
+            , error: function () {
+                layer.alert('上传失败，请检查文件内容是否符合上传模板！')
             }
         });
 

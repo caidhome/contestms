@@ -323,13 +323,16 @@
                     type: "POST",
                     success: function (result) {
                         layer.msg(result.msg, {
-                            icon: result.code
+                            icon: result.code,
+                            time: 2000
+                        },function () {
+                            if(result.code == 6){
+                                window.top.location.href='/contest/detial/{{ con.con_id }}/'
+                            }else{
+                                window.top.location.reload()
+                            }
                         });
-                        if(result.code == 6){
-                            window.top.location.href='/contest/detial/{{ con.con_id }}/'
-                        }else{
-                            {#window.top.location.reload()#}
-                        }
+
                     },
                     error: function (result) {
                         layer.msg('服务器异常！', {

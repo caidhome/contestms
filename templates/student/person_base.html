@@ -49,7 +49,7 @@
         <div class="nav fl">
             <p class="center picture">
                 <img src="/static{{ request.session.login_user.stu_avator }}" width="101" height="101">
-                <span class="h3 c-333">陈志文</span>
+                <span class="h7 c-333" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px;" title="{{ request.session.login_user.stu_motto }}">{{ request.session.login_user.stu_motto }}</span>
             </p>
             <div id="leftbar">
                 <ul id="leftbar_personal" ng-include="/pages/dasai/common/left_personal.html"
@@ -158,7 +158,7 @@
     {% endblock %}
     </div>
 
-    <!--尾部位置开始-->
+    <!--尾部位置开始
     <div class="footer-wrap">
         <div class="bg1">
             <div class="clearfix wrap">
@@ -196,7 +196,7 @@
                 <p class="p2">京公网安备 11010802020352号</p>
             </div>{% endcomment %}
         </div>
-    </div>
+    </div>-->
     <!-- Global site tag (gtag.js) - Google Analytics -->
     {% block person_js %}
     {% endblock %}

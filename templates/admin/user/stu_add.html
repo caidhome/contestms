@@ -29,6 +29,18 @@
                           <span class="x-red">*</span>{% comment %}将会成为您唯一的登入名{% endcomment %}
                       </div>
                   </div>
+                <div class="layui-form-item">
+                      <label for="username" class="layui-form-label">
+                          <span class="x-red">*</span>性别
+                      </label>
+                      <div class="layui-input-inline">
+                          <input type="radio" id="sex" name="stu_sex" required="" lay-verify="required" class="layui-input" value="F" checked>男 &nbsp;&nbsp;&nbsp;&nbsp;
+                          <input type="radio" id="sex" name="stu_sex" required="" lay-verify="required" class="layui-input" value="M"> 女
+                      </div>
+                      <div class="layui-form-mid layui-word-aux">
+                          <span class="x-red"></span>{% comment %}将会成为您唯一的登入名{% endcomment %}
+                      </div>
+                  </div>
                   <div class="layui-form-item">
                       <label for="phone" class="layui-form-label">
                           <span class="x-red">*</span>学号
@@ -93,7 +105,7 @@
                           <span class="x-red">*</span>专业
                       </label>
                       <div class="layui-input-inline">
-                          <input type="text" id="L_email" name="stu_major" required="" lay-verify="" value="{{ user.stu_major }}"
+                          <input type="text" id="L_email" name="stu_major" required="" lay-verify="required" value="{{ user.stu_major }}"
                           autocomplete="off" class="layui-input">
                       </div>
                       <div class="layui-form-mid layui-word-aux">
@@ -105,12 +117,36 @@
                           <span class="x-red">*</span>学院
                       </label>
                       <div class="layui-input-inline">
-                          <input type="text" id="L_email" name="stu_depart" required="" lay-verify="" value="{{ user.stu_depart }}"
+                          <input type="text" id="L_email" name="stu_depart" required="" lay-verify="required" value="{{ user.stu_depart }}"
                           autocomplete="off" class="layui-input">
                       </div>
                       <div class="layui-form-mid layui-word-aux">
                           <span class="x-red">*</span>
                       </div>
+                  </div>
+                    <div class="layui-form-item">
+                          <label for="L_email" class="layui-form-label">
+                              <span class="x-red">*</span>身份证
+                          </label>
+                          <div class="layui-input-inline">
+                              <input type="text" id="L_card" name="stu_card" required="" lay-verify="card" value="{{ user.stu_card }}"
+                              autocomplete="off" class="layui-input">
+                          </div>
+                          <div class="layui-form-mid layui-word-aux">
+                              <span class="x-red">*</span>
+                          </div>
+                  </div>
+                <div class="layui-form-item">
+                          <label for="L_email" class="layui-form-label">
+                              <span class="x-red">*</span>宣言
+                          </label>
+                          <div class="layui-input-inline">
+                              <input type="text" id="L_card" name="stu_motto" required="" lay-verify="required" value="{{ user.stu_motto }}"
+                              autocomplete="off" class="layui-input">
+                          </div>
+                          <div class="layui-form-mid layui-word-aux">
+                              <span class="x-red">*</span>
+                          </div>
                   </div>
                   <div class="layui-form-item">
                     <label class="layui-form-label">上传头像</label>
@@ -191,8 +227,9 @@
                 });
 
                 //自定义验证规则
+                var reg_card = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
                 form.verify({
-                    nikename: function(value) {
+                    username: function(value) {
                         if (value.length < 5) {
                             return '昵称至少得5个字符啊';
                         }
@@ -201,6 +238,11 @@
                     repass: function(value) {
                         if ($('#L_pass').val() != $('#L_repass').val()) {
                             return '两次密码不一致';
+                        }
+                    },
+                    card: function(value) {
+                        if (!reg_card.test($('#L_card').val())) {
+                            return '身份证号码格式错误！';
                         }
                     }
                 });
