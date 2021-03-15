@@ -18,7 +18,7 @@ from django.urls import path, include, re_path
 from contestms.views import ListView, AddView, DelView, DetialView, HeadView, SignView, \
     UploadScoreView,Sign_List_View, Sign_Check_View, Sign_GenCert_View, Sign_Person_View,\
     Sign_Score_View, Cert_download_View, Template_download_View, Downzip_Certs_View,\
-    SendNoticeView, GroupListView, GroupAddView, GroupDelView, GroupManageView
+    SendNoticeView, GroupListView, GroupAddView, GroupDelView, GroupManageView, GroupPartView
 
 urlpatterns = [
     re_path('^list$', ListView.as_view(), name='list'),
@@ -43,4 +43,5 @@ urlpatterns = [
     re_path('^group/add$', GroupAddView.as_view(), name='groupadd'),
     re_path('^group/del$', GroupDelView.as_view(), name='groupdel'),
     re_path('^group/manage/(\d+)/$', GroupManageView.as_view(), name='groupmanage'),
+    re_path('^group/part$', GroupPartView.as_view(), name='groupmanage'),
 ]

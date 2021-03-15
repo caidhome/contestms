@@ -210,10 +210,22 @@ class DetialView(View):
             print(ex)
         cur_sign = None
         if is_login and is_login in [1, 2]:
-            groups = Group.objects.filter(group_conid=contest.con_id)
+            groups = Group.objects.filter(group_conid__con_id=contest.con_id)
+            # group_list = list()
+            # for group in groups:
+            #     g_dict = dict()
+            #     g_dict['group'] = group
+            #     sign_list = Sign.objects.filter(sign_groupid__group_id=group.group_id)
+            #     stu_list = list()
+            #     for sign in sign_list:
+            #         print(sign.sign_stuid_id)
+            #         stu_list.append(Student.objects.get(stu_id=sign.sign_stuid_id))
+            #     g_dict['stu'] = stu_list
+            #     group_list.append(g_dict)
+
             group_dict = dict()
             for group in groups:
-                sign_list = Sign.objects.filter(sign_groupid=group.group_conid_id)
+                sign_list = Sign.objects.filter(sign_groupid__group_id=group.group_id)
                 stu_list = list()
                 for sign in sign_list:
                     stu_list.append(Student.objects.get(stu_id=sign.sign_stuid_id))
@@ -451,7 +463,7 @@ class Sign_List_View(View):
                 , "msg": msg
             }
             return JsonResponse(response_data)
-        sign_list = Sign.objects.filter(sign_conid=cur_con)
+        sign_list = Sign.objects.filter(sign_conid=cur_con).order_by('sign_groupid')
 
         data = list(sign_list.values())
         for s_item in data:
@@ -464,11 +476,34 @@ class Sign_List_View(View):
                 s_item['sign_state'] = '弃赛'
             else:
                 s_item['sign_state'] = '正常'
+
+            group = '未分组'
+            if s_item['sign_groupid_id']:
+                group = Group.objects.get(group_id=s_item['sign_groupid_id']).group_name
+            s_item['sign_group'] = group
+
+            sex_dict = {'F': '男', 'M': '女'}
             try:
                 # s_item['sign_conname'] = Contest.objects.get(con_id=temp_obj['sign_conid_id'])
-                s_item['sign_stuname'] = Student.objects.get(stu_id=temp_obj['sign_stuid_id']).stu_name
+                student = Student.objects.get(stu_id=temp_obj['sign_stuid_id'])
+                s_item['sign_stuname'] = student.stu_name
+                s_item['sign_sex'] = sex_dict[student.stu_sex]
+                s_item['sign_major'] = student.stu_major
+                s_item['sign_motto'] = student.stu_motto
+                s_item['sign_tel'] = student.stu_tel
+                s_item['sign_card'] = student.stu_card
+                s_item['sign_email'] = student.stu_email
             except Exception as ex:
                 print(ex)
+
+            """
+            <th lay-data="{field:'sign_sex', width:100, hide: true">性别</th>
+                                            <th lay-data="{field:'sign_major', width:100, hide: true">专业</th>
+                                            <th lay-data="{field:'sign_motto', width:100, hide: true">个人宣言</th>
+                                            <th lay-data="{field:'sign_tel', width:100, hide: true">电话</th>
+                                            <th lay-data="{field:'sign_card', width:100, hide: true">身份证</th>
+                                            <th lay-data="{field:'sign_email', width:100, hide: true">邮箱</th>
+            """
 
             if temp_obj['sign_detial']:
                 detial_arr = temp_obj['sign_detial'].split('&')
@@ -602,12 +637,10 @@ class Sign_GenCert_View(View):
         }
         if sid == '0':
             sign_list = Sign.objects.filter(sign_conid_id=cid).values('sign_id', 'sign_conid_id', 'sign_stuid_id')
-            print(len(sign_list))
             for sign in sign_list:
                 response_data = self.gen_single(host_url, sign['sign_conid_id'], sign['sign_stuid_id'])
         else:
             response_data = self.gen_single(host_url, cid, sid)
-        print(response_data)
         return JsonResponse(response_data)
 
     def gen_single(self,host_url, cid, sid):
@@ -619,9 +652,11 @@ class Sign_GenCert_View(View):
             stu = Student.objects.get(stu_id=sid)
         except Exception as ex:
             print(ex)
-            return {"msg": '暂无当前学生或竞赛信息<br>生成失败学生ID：'+sid, "code": 2, 'url': ""}
+            return {"msg": '暂无当前学生或竞赛信息<br>生成失败，学生ID：%d' % sid, "code": 2, 'url': ""}
         if sign_list and len(sign_list) > 0:
             sign_obj = sign_list[0]
+            if sign_obj.sign_state != 3:
+                return {"msg": '当前学生暂无成绩信息<br>生成失败，学生ID：%d' % sid, "code": 2, 'url': ""}
         else:
             return {"msg": '暂无当前报名信息，生成失败学生名称：'+stu.stu_name, "code": 2, 'url': ""}
         cert_obj = contest.con_certid
@@ -950,13 +985,78 @@ class GroupManageView(View):
         login_user_sess = request.session.get('login_user')
         if not is_login or not login_user_sess or is_login not in [1, 2]:
             return render(request, 'admin/user/login.html',
-                          {'err_msg': '您当前权限不够，请登录后重试。', 'next': '/contest/list'})
+                          {'err_msg': '您当前权限不够，请登录后重试。', 'next': '/contest/group/manage/%s/' % gid})
         group = Group.objects.get(group_id=gid)
-        sign_list = Sign.objects.filter(sign_groupid=gid)
+        con = Contest.objects.get(con_id=group.group_conid_id)
+        sign_list = Sign.objects.filter(sign_conid_id=con.con_id)
+        # sign_list = Sign.objects.filter(sign_groupid_id=gid)
         stu_list = list()
+        stu_grouped = list()
         for sign in sign_list:
-            stu_list.append(Student.objects.get(stu_id=sign.sign_stuid_id))
-        return render(request, 'admin/group/group_manage.html', {'group': group, 'stu_list': stu_list})
+            s_stu = Student.objects.get(stu_id=sign.sign_stuid_id)
+            if sign.sign_groupid_id == None or sign.sign_groupid_id == int(gid):
+                stu_list.append(s_stu)
+            if sign.sign_groupid_id == int(gid):
+                stu_grouped.append(s_stu.stu_id)
+        # stu_dict = dict()
+        # stu_grouped = list()
+        # stu_ungroup = list()
+        # for sign in sign_list:
+        #     if sign.sign_groupid:
+        #         stu_grouped.append(Student.objects.get(stu_id=sign.sign_stuid_id))
+        #     else:
+        #         stu_ungroup.append(Student.objects.get(stu_id=sign.sign_stuid_id))
+        # stu_dict['grouped'] = stu_grouped
+        # stu_dict['ungroup'] = stu_ungroup
+        # print(stu_dict)
+        return render(request, 'admin/group/group_manage.html', {'group': group, 'stu_list': stu_list, 'grouped': stu_grouped})
 
     def post(self, request):
         pass
+
+class GroupPartView(View):
+
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        is_login = request.session.get('is_login')
+        login_user_sess = request.session.get('login_user')
+        if not is_login or not login_user_sess or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请登录后重试。', 'next': '/contest/group/part'})
+        code = 6
+        msg = '分组成功！'
+        gid = request.POST.get('gid')
+        group = Group.objects.get(group_id=gid)
+        add_list = request.POST.getlist('add')
+        del_list = request.POST.getlist('del')
+        for stu_add in add_list:
+            sign_list = Sign.objects.filter(sign_conid_id=group.group_conid.con_id, sign_stuid_id=stu_add)
+            if sign_list and len(sign_list) > 0:
+                cur_sign = sign_list[0]
+                cur_sign.sign_groupid_id = int(gid)
+                cur_sign.save()
+        for stu_del in del_list:
+            sign_list_del = Sign.objects.filter(sign_groupid_id=group.group_id, sign_stuid_id=stu_del)
+            if sign_list_del and len(sign_list_del) > 0:
+                cur_sign_del = sign_list_del[0]
+                cur_sign_del.sign_groupid = None
+                cur_sign_del.save()
+                msg = '删除成功'
+
+        # try:
+        #     group = Group.objects.get(group_id=gid)
+        #     group.delete()
+        #     code = 6
+        #     msg = '删除成功'
+        # except Exception as ex:
+        #     code = 2
+        #     print(ex)
+        #     msg = '删除失败'
+        response_data = {
+            "code": code
+            , "msg": msg
+        }
+        return JsonResponse(response_data)
+

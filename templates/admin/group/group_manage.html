@@ -19,7 +19,6 @@
     <body>
         <div class="layui-fluid">
             <div class="layui-row">
-                <form class="layui-form" method="post" id="group_add_form" lay-filter="component-form-element">
                 {% csrf_token %}
                     <div class="layui-form-item">
                         <label for="username" class="layui-form-label">
@@ -36,96 +35,113 @@
 
                     <div class="layui-form-item">
                         <label for="L_repass" class="layui-form-label"></label>
-                        <button class="layui-btn" lay-filter="component-form-element" lay-submit="">
-                            {% if group.group_id %}更新{% else %}增加{% endif %}
-                        </button>
+                        <button type="button" class="layui-btn" lay-demotransferactive="closeWin">完成</button>
                     </div>
+
                 <input type="hidden" name="group_id" value="{{ group.group_id }}">
-                </form>
-            </div>
-        </div>
-        <script>
-            layui.use(['transfer', 'form', 'layer', 'util'],
-            function() {
-                var form = layui.form,
-                    $ = layui.$
-                   ,transfer = layui.transfer
-                   ,layer = layui.layer
-                   ,util = layui.util;
+                    <script>
 
+                        layui.use(['transfer', 'form', 'layer', 'util'],
+                            function() {
+                                var form = layui.form,
+                                    $ = layui.$
+                                    ,transfer = layui.transfer
+                                    ,layer = layui.layer
+                                    ,util = layui.util;
 
-                //模拟数据
-                  var data1 = [
-                    {"value": "1", "title": "李白"}
-                    ,{"value": "2", "title": "杜甫"}
-                    ,{"value": "3", "title": "苏轼"}
-                    ,{"value": "4", "title": "李清照"}
-                    ,{"value": "5", "title": "鲁迅", "disabled": true}
-                    ,{"value": "6", "title": "巴金"}
-                    ,{"value": "7", "title": "冰心"}
-                    ,{"value": "8", "title": "矛盾"}
-                    ,{"value": "9", "title": "贤心"}
-                  ]
+                                var grouplist = new Array();
+                                var ungroup = new Array();
+                                var stu_all = new Array();
+                                {% comment %}{% for key,value in stu_dict.items %}
+                                    {% for stu1 in value %}
+                                            grouped.push({'value': '{{ stu1.stu_id }}', 'title': '{{ stu1.stu_name }}'})
+                                        {% endfor %}
+                                    {% ifequal key 'grouped' %}
+                                        {% for stu1 in value %}
+                                            grouped.push({'value': '{{ stu1.stu_id }}', 'title': '{{ stu1.stu_name }}'})
+                                        {% endfor %}
+                                        {% else %}
+                                        {% for stu2 in value %}
+                                            ungroup.push({'value': '{{ stu2.stu_id }}', 'title': '{{ stu2.stu_name }}'})
+                                        {% endfor %}
+                                    {% endifequal %}
+                                {% endfor %}
+                                {% endcomment %}
+                                {% for stu in stu_list %}
+                                    stu_all.push({'value': {{ stu.stu_id }}, 'title': '{{ stu.stu_name }}'})
+                                {% endfor %}
+                                {% for stued in grouped %}
+                                    grouplist.push({{ stued }})
+                                {% endfor %}
 
-                  ,data2 = [
-                    {"value": "1", "title": "瓦罐汤"}
-                    ,{"value": "2", "title": "油酥饼"}
-                    ,{"value": "3", "title": "炸酱面"}
-                    ,{"value": "4", "title": "串串香", "disabled": true}
-                    ,{"value": "5", "title": "豆腐脑"}
-                    ,{"value": "6", "title": "驴打滚"}
-                    ,{"value": "7", "title": "北京烤鸭"}
-                    ,{"value": "8", "title": "烤冷面"}
-                    ,{"value": "9", "title": "毛血旺", "disabled": true}
-                    ,{"value": "10", "title": "肉夹馍"}
-                    ,{"value": "11", "title": "臊子面"}
-                    ,{"value": "12", "title": "凉皮"}
-                    ,{"value": "13", "title": "羊肉泡馍"}
-                    ,{"value": "14", "title": "冰糖葫芦", "disabled": true}
-                    ,{"value": "15", "title": "狼牙土豆"}
-                  ]
+                                //初始右侧数据
+                                transfer.render({
+                                    elem: '#test3'
+                                    ,title: ['未分组', '{{ group.group_name }}']
+                                    ,data: stu_all
+                                    ,value: {{ grouped }}
+                                    ,showSearch: true
+                                    ,onchange: function(obj, index){
+                                      var arr = ['add', 'del'];
+                                      data_dict = {'csrfmiddlewaretoken': $("input[name='csrfmiddlewaretoken']").val(), 'gid': {{ group.group_id }}}
+                                      var ids = new Array()
+                                      for(i=0; i < obj.length; i++){
+                                          ids.push(obj[i].value+'')
+                                      }
+                                      data_dict[arr[index]] = ids
+                                      {#alert(JSON.stringify(ids))#}
+                                     $.ajax({
+                                            url: '/contest/group/part',
+                                            data: data_dict,
+                                            traditional:true,
+                                            dataType: "json",
+                                            type: "POST",
+                                            success: function (result) {
+                                                if (result.code === 6) {
+                                                    layer.msg(result.msg, {
+                                                        icon: result.code
+                                                    })
+                                                }
+                                                {% comment %}if (result.code === 6) {
+                                                    layer.alert(result.msg, {
+                                                            icon: result.code
+                                                        },
+                                                        function() {
+                                                            parent.location.reload(true);
+                                                            // 获得frame索引
+                                                            var index = parent.layer.getFrameIndex(window.name);
+                                                            console.log(index)
+                                                            //关闭当前frame
+                                                            parent.layer.close(index);
+                                                        });
+                                                } else {
+                                                    layer.alert(result.msg, {
+                                                        icon: result.code
+                                                    });
+                                                }{% endcomment %}
+                                            }
+                                        });
 
-                //初始右侧数据
-                  transfer.render({
-                    elem: '#test3'
-                    ,data: data2
-                    ,value: ["1", "3", "5", "7", "9", "11"]
-                  })
+                                    }
+                                })
 
-                //监听提交
-                form.on('submit(component-form-element)',
-                function(data) {
-                    {#layer.alert(JSON.stringify(data.field));#}
-                    var data = $('#group_add_form').serialize()
-                    $.ajax({
-                        url: '/contest/group/add',
-                        data: data,
-                        dataType: "json",
-                        type: "POST",
-                        success: function (result) {
-                            if (result.code === 6) {
-                            layer.alert(result.msg, {
-                                    icon: result.code
-                                },
-                                function() {
+                            util.event('lay-demoTransferActive', {
+                                closeWin: function(othis){
                                     parent.location.reload(true);
                                     // 获得frame索引
                                     var index = parent.layer.getFrameIndex(window.name);
                                     console.log(index)
                                     //关闭当前frame
                                     parent.layer.close(index);
-                                });
-                            } else {
-                                layer.alert(result.msg, {
-                                    icon: result.code
-                                });
-                            }
-                        }
-                    });
-                    return false;
-                });
+                                }
+                              });
 
-            });</script>
+                            });
+
+
+                    </script>
+            </div>
+        </div>
     </body>
 
 </html>

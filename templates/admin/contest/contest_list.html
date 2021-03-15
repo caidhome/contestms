@@ -165,8 +165,8 @@
 
 
         function show_contest(id) {
-            xadmin.add_tab($('#con_name_'+id).text(),'/contest/detial/'+id+'/', true)
-            window.top.location.reload()
+            parent.xadmin.add_tab($('#con_name_'+id).text(),'/contest/detial/'+id+'/', true)
+            {#window.top.location.reload()#}
         }
 
 
@@ -174,9 +174,7 @@
         function member_stop(obj, id) {
             layer.confirm('确认要停用吗？',
             function(index) {
-
                 if ($(obj).attr('title') == '启用') {
-
                     //发异步把用户状态进行更改
                     $(obj).attr('title', '停用');
                     $(obj).find('i').html('&#xe62f;');

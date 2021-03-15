@@ -14,6 +14,17 @@
     <!-- <link rel="stylesheet" href="./css/theme5.css"> -->
 </head>
 <body style="margin: 20px;">
+     <div class="x-nav">
+        <span class="layui-breadcrumb">
+{#                <a href="">订单列表</a>#}
+{#                <a href="">演示</a>#}
+            <a>
+                <cite>竞赛列表</cite></a>
+        </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
     <div class="layui-row">
         {% csrf_token %}
         <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
@@ -89,7 +100,7 @@
             {% for gitem, stu_list in group_dict.items %}
             <blockquote class="layui-elem-quote">
                 {{ gitem.group_name }} &nbsp;&nbsp;&nbsp;&nbsp;
-              <a class="layui-btn layui-btn-normal layui-btn-sm" onclick="xadmin.open('管理分组','/contest/group/manage/{{ gitem.group_id }}/')" href="javascript: void(0);">管理</a>
+              <a class="layui-btn layui-btn-normal layui-btn-sm" onclick="xadmin.open('管理分组','/contest/group/manage/{{ gitem.group_id }}/', 580, 590)" href="javascript: void(0);">管理</a>
             </blockquote>
             <div>
                 {% for stu_item in stu_list %}
@@ -120,20 +131,29 @@
                     <div class="layui-col-md12">
                         <div class="layui-card">
                             <div class="layui-card-body ">
-                                <table class="layui-table" lay-data="{url:'/contest/sign/list/{{ con.con_id }}/',page:true,toolbar: '#toolbarDemo',id:'test'}" lay-filter="test">
+                                <table id="sign_table" class="layui-table" lay-data="{url:'/contest/sign/list/{{ con.con_id }}/',page:true,toolbar: '#toolbarDemo',id:'test'}" lay-filter="test">
                                     <thead>
                                         <tr>
                                             <th lay-data="{type:'checkbox', minWidth:20}">ID</th>
-                                            <th lay-data="{field:'sign_id', width:100, sort: true}">ID</th>
-                                            <th lay-data="{field:'sign_stuname', width:120, minWidth: 100}">参赛人</th>
-                                            <th lay-data="{field:'sign_teach', width:120, minWidth: 100}">指导教师</th>
-                                            <th lay-data="{field:'sign_lang', width:100, sort: true}">语言</th>
-                                            <th lay-data="{field:'sign_total', width: 100, sort: true}">总分</th>
+                                            <th lay-data="{field:'sign_id', sort: true}">ID</th>
+                                            <th lay-data="{field:'sign_group'}">分组</th>
+                                            <th lay-data="{field:'sign_stuname', minWidth: 100}">参赛人</th>
+                                            <th lay-data="{field:'sign_teach', minWidth: 100}">指导教师</th>
+                                            <th lay-data="{field:'sign_lang', sort: true}">语言</th>
+                                            <th lay-data="{field:'sign_total', sort: true}">总分</th>
                                             <th lay-data="{field:'sign_detial', minWidth: 100}">得分详情</th>
-                                            <th lay-data="{field:'sign_level', width:150}">等级</th>
-                                            <th lay-data="{field:'sign_state', minWidth: 100}">状态</th></tr>
-                                            <th lay-data="{field:'sign_stuid_id', hide: true}"></th></tr>
-                                            <th lay-data="{field:'sign_conid_id', hide: true}"></th></tr>
+                                            <th lay-data="{field:'sign_level',}">等级</th>
+                                            <th lay-data="{field:'sign_state', minWidth: 100}">状态</th>
+                                            <th lay-data="{field:'sign_stuid_id', hide: true}">学生ID</th>
+                                            <th lay-data="{field:'sign_conid_id', hide: true}">竞赛ID</th>
+
+                                            <th lay-data="{field:'sign_sex', hide: true}">性别</th>
+                                            <th lay-data="{field:'sign_major', hide: true}">专业</th>
+                                            <th lay-data="{field:'sign_motto', hide: true}">个人宣言</th>
+                                            <th lay-data="{field:'sign_tel', hide: true}">电话</th>
+                                            <th lay-data="{field:'sign_card', hide: true}">身份证</th>
+                                            <th lay-data="{field:'sign_email', hide: true}">邮箱</th>
+                                            </tr>
                                     </thead>
                                 </table>
                             </div>
@@ -180,7 +200,6 @@
             }
         });
 
-
         {% comment %}//监听单元格编辑
         table.on('edit(test)',
         function(obj) {
@@ -210,7 +229,7 @@
                     break;
                 };
             });{% endcomment %}
-
+        {#autoRowSpan()#}
     });
 
     function checkState(sid) {
@@ -454,6 +473,26 @@
                 $("#gen_load_ico").addClass("layui-hide");
             }
         });
+    }
+
+    function autoRowSpan(){
+        var row=0;
+        var col = 3;
+        var tb = document.getElementById("sign_table");
+        var lastValue="";
+        var value="";
+        var pos=1;
+        for(var i=row;i<tb.rows.length;i++){
+            value = tb.rows[i].cells[col].innerText;
+            if(lastValue == value){
+                tb.rows[i].deleteCell(col);
+                tb.rows[i-pos].cells[col].rowSpan = tb.rows[i-pos].cells[col].rowSpan+1;
+                pos++;
+            }else{
+                lastValue = value;
+                pos=1;
+            }
+        }
     }
 
 
