@@ -636,22 +636,22 @@ class Email_code_APIView(View):
             key = 'tts_verfiy_code_' + email
             redis_client = get_redis_connection('code')
             code_ = redis_client.get(key)
-            if not code_:
-                # 生成随机的验证码
-                code = self.Email_Code()
-                # 给邮箱发送验证码
-                # 发邮件
-                from_email = settings.EMAIL_FROM
-                subject = '竞赛管理系统-修改个人信息'
-                text_content = ''
-                html_content = '<p style="font-size: 18px;">[兰州理工大学竞赛管理系统] 验证码:<br><br><div style="text-align: center; font-size: 24px;"><strong><a href="">%s</a></strong></div>' \
-                               '<br><br>该验证码仅用于身份验证，请勿泄露给他人使用。</p>' % code
-                send_msg = EmailMultiAlternatives(subject, text_content, from_email, [email])
-                send_msg.attach_alternative(html_content, "text/html")
-                send_msg.send()
+            # if not code_:
+            # 生成随机的验证码
+            code = self.Email_Code()
+            # 给邮箱发送验证码
+            # 发邮件
+            from_email = settings.EMAIL_FROM
+            subject = '竞赛管理系统-修改个人信息'
+            text_content = ''
+            html_content = '<p style="font-size: 18px;">[兰州理工大学竞赛管理系统] 验证码:<br><br><div style="text-align: center; font-size: 24px;"><strong><a href="">%s</a></strong></div>' \
+                           '<br><br>该验证码仅用于身份验证，请勿泄露给他人使用。</p>' % code
+            send_msg = EmailMultiAlternatives(subject, text_content, from_email, [email])
+            send_msg.attach_alternative(html_content, "text/html")
+            send_msg.send()
 
-                redis_client = get_redis_connection('code')
-                redis_client.setex(key, 60 * 5, code)
+            redis_client = get_redis_connection('code')
+            redis_client.setex(key, 60 * 5, code)
             # cache.set(key, code, 30)  # 5分钟的有效时间
             ret = {
                 'code': 6,

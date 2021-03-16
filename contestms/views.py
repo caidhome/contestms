@@ -630,15 +630,22 @@ class Sign_GenCert_View(View):
     def post(self, request, cid, sid):
         host_url = '%s://%s' % (request.META['wsgi.url_scheme'], request.META['HTTP_HOST'])
         # 批量生成
+        msg = "生成失败！"
         response_data = {
             "code": 2
-            , "msg": "服务器错误"
+            , "msg": msg
             , 'url': ''
         }
         if sid == '0':
             sign_list = Sign.objects.filter(sign_conid_id=cid).values('sign_id', 'sign_conid_id', 'sign_stuid_id')
+            # err_list = list()
+            err_list = ''
             for sign in sign_list:
                 response_data = self.gen_single(host_url, sign['sign_conid_id'], sign['sign_stuid_id'])
+                if response_data['code'] == 3:
+                    err_list = err_list + str(response_data['err_sid']) + ','
+                    response_data['msg'] = '部分学生再无成绩信息，请上传成绩后再试！无成绩学生ID：%s' % err_list[:-1]
+                    response_data['code'] = 2
         else:
             response_data = self.gen_single(host_url, cid, sid)
         return JsonResponse(response_data)
@@ -652,11 +659,11 @@ class Sign_GenCert_View(View):
             stu = Student.objects.get(stu_id=sid)
         except Exception as ex:
             print(ex)
-            return {"msg": '暂无当前学生或竞赛信息<br>生成失败，学生ID：%d' % sid, "code": 2, 'url': ""}
+            return {"msg": '暂无当前学生或竞赛信息<br>生成失败，学生ID：%d' % sid, "code": 2}
         if sign_list and len(sign_list) > 0:
             sign_obj = sign_list[0]
             if sign_obj.sign_state != 3:
-                return {"msg": '当前学生暂无成绩信息<br>生成失败，学生ID：%d' % sid, "code": 2, 'url': ""}
+                return {"msg": '当前学生暂无成绩信息<br>生成失败，学生ID：%d' % sid, "code": 3, 'url': "", 'err_sid': stu.stu_id}
         else:
             return {"msg": '暂无当前报名信息，生成失败学生名称：'+stu.stu_name, "code": 2, 'url': ""}
         cert_obj = contest.con_certid
@@ -755,7 +762,6 @@ class Cert_download_View(View):
             print(ex)
         return HttpResponse('下载错误！')
 
-
     def post(self, request):
         pass
 
@@ -798,7 +804,6 @@ class Downzip_Certs_View(View):
             absFile = os.path.join(absDir, f)  # 子文件的绝对路径
             if os.path.isdir(absFile):  # 判断是文件夹，继续深度读取。
                 relFile = absFile[len(absDir) + 1:]  # 改成相对路径，否则解压zip是/User/xxx开头的文件。
-                print(os.getcwd())
                 zipFile.write(relFile)  # 在zip文件中创建文件夹
                 self.writeAllFileToZip(absFile, zipFile)  # 递归操作
             else:  # 判断是普通文件，直接写到zip文件中。
@@ -841,9 +846,9 @@ class SendNoticeView(View):
 
     def post(self, request, cid):
         redis_client = get_redis_connection('code')
-        con_send_state = redis_client.get('tts_con_sendnotice_state_' + cid)
-        if con_send_state and con_send_state.decode() == '1':
-            return JsonResponse({'code': 2, 'msg': '通知已发送，请勿重复发送！'})
+        # con_send_state = redis_client.get('tts_con_sendnotice_state_' + cid)
+        # if con_send_state and con_send_state.decode() == '1':
+        #     return JsonResponse({'code': 2, 'msg': '通知已发送，请勿重复发送！'})
         code = 6
         msg = '通知群发成功！'
         email_list = list()
@@ -1060,3 +1065,136 @@ class GroupPartView(View):
         }
         return JsonResponse(response_data)
 
+
+class Downzip_Avator_View(View):
+
+    @xframe_options_sameorigin
+    def get(self, request, export_type, cid):
+        is_login = request.session.get('is_login')
+        login_user = request.session.get('login_user')
+        if not is_login or is_login not in [1, 2] or not login_user:
+            return JsonResponse({"code": 2, "msg": '当前权限不够！'})
+
+        type_str = ['common', 'part']
+
+        # con = Contest.objects.get(con_id=cid)
+        cert_zip_dir = '%s/contest/avator_export/zip/%s/%s' % (settings.DOWNLOAD_ROOT, type_str[int(export_type)], cid)
+        if not os.path.exists(cert_zip_dir):
+            os.makedirs(cert_zip_dir)
+
+
+        absDir = '%s/user/avator/student/' % (settings.UPLOAD_ROOT)
+        zipFilePath = os.path.join(cert_zip_dir, "avator_%s.zip" % cid)
+        zipFile = zipfile.ZipFile(zipFilePath, "w", zipfile.ZIP_DEFLATED)
+        if not os.path.exists(absDir):
+            return HttpResponse("暂无头像信息！")
+        os.chdir(absDir)
+
+        has_custom_avator = True
+        if export_type == '0':
+            sign_list = Sign.objects.filter(sign_conid_id=cid)
+            for sign in sign_list:
+                stu = Student.objects.get(stu_id=sign.sign_stuid_id)
+                if stu.stu_avator != '/upload/user/avator/student/default_avator.jpg':
+                    has_custom_avator = False
+                    # avator_file_list.append(stu.stu_avator)
+                    absFile = os.path.join(settings.BASE_DIR, 'static', stu.stu_avator[1:])
+                    print(absFile)
+                    # if not os.path.isdir():
+                    relFile = absFile[len(absDir):]  # 改成相对路径
+                    zipFile.write(relFile)
+        else:
+            group_list = Group.objects.filter(group_conid_id=cid)
+            avator_part_dir = '%s/contest/avator_export/file/%s/%s' % (settings.DOWNLOAD_ROOT, type_str[int(export_type)], cid)
+            for group in group_list:
+                sign_group_list = Sign.objects.filter(sign_conid_id=cid, sign_groupid_id=group.group_id)
+                if not os.path.exists(os.path.join(avator_part_dir, group.group_name)):
+                    os.makedirs(os.path.join(avator_part_dir, group.group_name))
+                if sign_group_list and len(sign_group_list) > 0:
+                    for sign_group in sign_group_list:
+                        stu_group = Student.objects.get(stu_id=sign_group.sign_stuid_id)
+                        if not stu_group.stu_avator or not os.path.exists(os.path.join(settings.BASE_DIR, 'static', stu_group.stu_avator[1:])) or stu_group.stu_avator == '/upload/user/avator/student/default_avator.jpg':
+                            continue
+                        has_custom_avator = False
+                        with open(os.path.join(settings.BASE_DIR, 'static', stu_group.stu_avator[1:]), 'rb') as f_r:
+                            content = f_r.read()
+                        with open(os.path.join(avator_part_dir, group.group_name, '%s_%s%s' % (stu_group.stu_no, stu_group.stu_name, os.path.splitext(os.path.basename(stu_group.stu_avator))[1])), 'wb') as f_w:
+                            f_w.write(content)
+            sign_group_list = Sign.objects.filter(sign_conid_id=cid, sign_groupid_id__isnull=True)
+            if not os.path.exists(os.path.join(avator_part_dir, '未分组')):
+                os.makedirs(os.path.join(avator_part_dir, '未分组'))
+
+            os.chdir(avator_part_dir)
+            Downzip_Certs_View().writeAllFileToZip(avator_part_dir, zipFile)  # 递归操作
+
+        zipFile.close()
+            # for f in os.listdir(avator_part_dir):
+            #     absFile = os.path.join(avator_part_dir, f)  # 子文件的绝对路径
+            #     if os.path.isdir(absFile):  # 判断是文件夹，继续深度读取。
+            #         relFile = absFile[len(avator_part_dir) + 1:]  # 改成相对路径，否则解压zip是/User/xxx开头的文件。
+            #         zipFile.write(relFile)  # 在zip文件中创建文件夹
+            #         Downzip_Certs_View().writeAllFileToZip(avator_part_dir, zipFile)  # 递归操作
+            #     else:  # 判断是普通文件，直接写到zip文件中。
+            #         relFile = absFile[len(avator_part_dir) + 1:]  # 改成相对路径
+            #         zipFile.write(relFile)
+            # zipFile.close()
+
+            # for group in group_list:
+            #     sign_group_list = Sign.objects.filter(sign_conid_id=cid, sign_groupid_id=group.group_id)
+            #     os.makedirs(os.path.join(cert_zip_dir, group.group_name))
+            #     zipFile.write('%s/' % group.group_name)
+            #     if sign_group_list and len(sign_group_list) > 0:
+            #         for sign_group in sign_group_list:
+            #             stu_group = Student.objects.get(stu_id=sign_group.sign_stuid_id)
+            #             if stu_group.stu_avator != '/upload/user/avator/student/default_avator.jpg':
+            #                 has_custom_avator = False
+            #                 # avator_file_list.append(stu.stu_avator)
+            #                 absFile = os.path.join(settings.BASE_DIR, 'static', stu_group.stu_avator[1:])
+            #                 # if not os.path.isdir():
+            #                 relFile = absFile[len(absDir):]  # 改成相对路径
+            #                 zipFile.write(relFile)
+
+
+
+
+
+        if has_custom_avator:
+            return HttpResponse("暂无头像信息！")
+
+        try:
+            # /download/cert/generate/1/png/cert_2016001_1.png
+            file = open(zipFilePath, 'rb')
+            response = HttpResponse(file)
+            response['Content-Type'] = 'application/zip'  # 设置头信息，告诉浏览器这是个文件
+            rand_name = 'avator_%s_%s' % (type_str[int(export_type)], datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[0:17])
+            response['Content-Disposition'] = 'attachment;filename="%s.zip"' % rand_name
+            return response
+        except Exception as ex:
+            print(ex)
+        return HttpResponse('下载错误！')
+
+    def post(self, request):
+        pass
+
+
+class Sign_DelList_View(View):
+
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        ids = request.POST.getlist('ids')
+        code = 6
+        msg = '删除成功！'
+        error_list = ""
+        for id in ids:
+            try:
+                sign = Sign(sign_id=id)
+                sign.delete()
+            except Exception as ex:
+                print(ex)
+                error_list = error_list + id + ','
+        if len(error_list) > 0:
+            code = 2
+            msg = '删除失败，失败学生ID：' + error_list[:-1]
+        return JsonResponse({'code': code, 'msg': msg })

@@ -25,13 +25,14 @@
             <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
         </a>
     </div>
-    <div class="layui-row">
+     <div class="layui-fluid">
+        <div class="layui-row">
         {% csrf_token %}
         <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
              <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px; text-align: center">
               <legend>{{ con.con_name }}</legend>
             </fieldset>
-            <ul class="layui-timeline">
+            <ul class="layui-timeline" style="margin-right: 20px;">
           <li class="layui-timeline-item">
             <i class="layui-icon layui-timeline-axis"></i>
             <div class="layui-timeline-content layui-text">
@@ -115,6 +116,15 @@
             </fieldset>
             <button type="button" class="layui-btn" id="test3"><i class="layui-icon layui-icon-upload"></i>导入成绩</button>
             <a href="/contest/down_temp?fname=score_template.xlsx" style="font-size: 14px;">下载上传模板</a>
+            <ul class="layui-nav layui-bg-green btnz" lay-filter="" style="font-size: 12px;border-radius: 0px;float: right;padding:0px 0px 0px 0px;margin-right: 40px;">
+                <li class="layui-nav-item" style="line-height: 30px;font-size: 12px;">
+                    <a href="javascript:;" class="layui-btn">导出头像&nbsp;&nbsp;<span class="layui-nav-more" style="right: 10px;font-size: 12px;"></span></a>
+                    <dl class="layui-nav-child" style="top: 30px;line-height: 31px;padding: 0px 0px 0px 0px;"> <!-- 二级菜单 -->
+                        <dd><a class="layui-btn layui-btn-fluid" href="/contest/sign/export_avator/1/{{ con.con_id }}/">分组导出</a></dd>
+                        <dd><a class="layui-btn layui-btn-fluid" href="/contest/sign/export_avator/0/{{ con.con_id }}/">普通导出</a></dd>
+                    </dl>
+                </li>
+            </ul>
             <div style="margin-top: 20px;">
                 <button type="button" class="layui-btn" onclick="gener_cert()">生成证书</button>
                 <span class="layui-hide" id="gen_load_ico">
@@ -124,8 +134,20 @@
                       </div>{% endcomment %}
                 </span>
                 <a type="button" class="layui-btn" href="/contest/sign/down_cert_zip/{{ con.con_id }}/">下载证书</a>
-            </div>
 
+
+            </div>
+            <script type="text/html" id="toolbarDemo">
+              <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-sm" lay-event="getCheckData">删除选中</button>
+{#                <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>#}
+{#                <button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>#}
+              </div>
+            </script>
+{#            <script type="text/html" id="barDemo">#}
+{#              <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>#}
+{#              <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>#}
+{#            </script>#}
             <div class="layui-fluid">
                 <div class="layui-row layui-col-space15">
                     <div class="layui-col-md12">
@@ -153,6 +175,7 @@
                                             <th lay-data="{field:'sign_tel', hide: true}">电话</th>
                                             <th lay-data="{field:'sign_card', hide: true}">身份证</th>
                                             <th lay-data="{field:'sign_email', hide: true}">邮箱</th>
+{#                                            <th lay-data="{fixed: 'right', title:'操作', toolbar: '#barDemo', width:150}">操作</th>#}
                                             </tr>
                                     </thead>
                                 </table>
@@ -163,7 +186,7 @@
             </div>
         </div>
     </div>
-
+     </div>
 </body>
 <script type="text/javascript" src="{% static  'lib/layui/layui.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
@@ -209,7 +232,7 @@
             ,
             field = obj.field; //得到字段
             layer.msg('[ID: ' + data.id + '] ' + field + ' 字段更改为：' + value);
-        });
+        });{% endcomment %}
 
         //头工具栏事件
         table.on('toolbar(test)',
@@ -218,17 +241,48 @@
                 switch (obj.event) {
                 case 'getCheckData':
                     var data = checkStatus.data;
-                    layer.alert(JSON.stringify(data));
+                    if(data.length <= 0){
+                        layer.msg('您当前还未选中任一报名信息！', {'icon': 2})
+                        break;
+                    }
+                    layer.confirm('您确定要删除该报名信息嘛？', {
+                        btn: ['确定', '取消']
+                    }, function (index, layero) {
+
+                        var data_list = new Array()
+
+                        for(i=0; i< data.length;i++){
+                            data_list.push(data[i]['sign_id'])
+                        }
+                        $.ajax({
+                            url: '/contest/sign/del_list',
+                            data: {'csrfmiddlewaretoken': $("input[name='csrfmiddlewaretoken']").val(), 'ids': data_list},
+                            traditional: true,
+                            dataType: "json",
+                            type: "POST",
+                            success: function (result) {
+                                layer.msg(result.msg, {
+                                    icon: result.code
+                                    , time: 1000
+                                })
+                                layui.table.reload('test', {})
+                            }
+                        });
+                        {#layer.closeAll('dialog');  //加入这个信息点击确定 会关闭这个消息框#}
+                     });
+
+
+                    {#layer.alert(JSON.stringify(data));#}
                     break;
-                case 'getCheckLength':
+                {% comment %}case 'getCheckLength':
                     var data = checkStatus.data;
                     layer.msg('选中了：' + data.length + ' 个');
                     break;
                 case 'isAll':
                     layer.msg(checkStatus.isAll ? '全选': '未全选');
-                    break;
+                    break;{% endcomment %}
                 };
-            });{% endcomment %}
+            });
         {#autoRowSpan()#}
     });
 
@@ -462,9 +516,9 @@
             dataType: "json",
             type: "POST",
             success: function (result) {
-               layui.layer.msg(result.msg, {
+               layui.layer.alert(result.msg, {
                     icon: result.code,
-                    time: 2000
+                    {#time: 2000#}
                 });
                $("#gen_load_ico").addClass("layui-hide");
             },

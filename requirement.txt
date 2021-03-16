@@ -1,0 +1,8 @@
+django
+pymysql
+xlrd
+redis-py
+django-redis
+qrcode
+PIL
+reportlab

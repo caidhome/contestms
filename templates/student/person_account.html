@@ -282,8 +282,9 @@
                 //普通图片上传
                 var uploadInst = upload.render({
                     elem: '#demo1',
-                    url: '/user/upload',//这里填写你的上传地址
+                    url: '/user/upload',
                     accept: 'images',
+                    auto: false ,
                     method: 'post',
                     data: {
                         'csrfmiddlewaretoken': function () {
@@ -292,12 +293,35 @@
                         'fpath': '/user/avator/student'
                     }
                     , acceptMime: 'image/*'
-                    , before: function (obj) {
+                    ,exts: 'jpg|png|jpeg'
+                    {% comment %}, before: function (obj) {
                         /*如果您不想用上面的URL 进行上传,也可以在这里,添加你的上传方式*/
                         obj.preview(function (index, file, result) {
                             $('#demo1').attr('src', result);//图片链接（base64）
                         });
-                    }, done: function (res) {
+                    }{% endcomment %}
+                    ,choose: function(obj){  //上传前选择回调方法
+                        var flag = true;
+                        {#console.log(file);            //file表示文件信息，result表示文件src地址#}
+                        obj.preview(function(index, file, result){
+                            var img = new Image();
+                            img.src = result;
+                            img.onload = function () { //初始化夹在完成后获取上传图片宽高，判断限制上传图片的大小。
+                                if(img.width ==413 && img.height ==626){
+                                    obj.upload(index, file); //满足条件调用上传方法
+                                }else{
+                                    flag = false;
+                                    layer.msg("您上传的小图大小必须是像素413*626px尺寸（2寸照片）！");
+                                    return false;
+                                }
+                            }
+                            return flag;
+                        });
+                        if(flag == true){
+                            $('#demo1').attr('src', result);
+                        }
+                    }
+                    , done: function (res) {
                         if (res.code == 6) {//长传成功(具体返回code 看后台是怎么处理的)
                             $('#logo').val(res.url)
                             $('#demo1').attr('src', '/static' + res.url);
@@ -305,7 +329,7 @@
                         } else {
                             demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
                         }
-                        layer.msg(res.msg);
+                        layer.msg(res.msg, {'icon': res.code});
                     }, error: function () {
                         demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
                     }
