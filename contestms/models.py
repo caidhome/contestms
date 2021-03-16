@@ -24,6 +24,7 @@ class Contest(models.Model):
 class Group(models.Model):
     group_id = models.IntegerField(primary_key=True)
     group_name = models.CharField(max_length=20)
+    group_motto = models.CharField(max_length=30)
     group_conid = models.ForeignKey(Contest, models.DO_NOTHING, db_column='group_conid')
 
     class Meta:

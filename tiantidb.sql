@@ -11,7 +11,7 @@
  Target Server Version : 50725
  File Encoding         : 65001
 
- Date: 16/03/2021 17:13:32
+ Date: 16/03/2021 21:40:21
 */
 
 SET NAMES utf8mb4;
@@ -259,9 +259,10 @@ CREATE TABLE `django_session`  (
 -- ----------------------------
 -- Records of django_session
 -- ----------------------------
-INSERT INTO `django_session` VALUES ('3o02osdkw3tc0rltbwfm3jfm58tte7d3', 'eyJpc19sb2dpbiI6MCwibG9naW5fdXNlciI6IiJ9:1lM5eC:vTCmhCfpp9uNc_8mYqnLa0kpP81e7Wi_m3OgBriKmvM', '2021-03-30 17:05:52.201110');
+INSERT INTO `django_session` VALUES ('3o02osdkw3tc0rltbwfm3jfm58tte7d3', '.eJxNjtEOgyAMRX9l6fMcLWxG-BlDlBgWFKOwF-O_r2Jmlvaht7097QZ-bUMc_ASG7lCqNq9uAbOB7UdWvi-jUywxuD9puy7mKYEBiRKb1xORGg2_8WRHdkNnmXGtfGyKjAeR5xBtL45r4uyKYhHJjXPLQEJFNYdSpEk_3rMbLgx_mnyhH8YKVUX1TaJBzQn7_gUOCkPK:1lM9I1:6qTuEoNPPTuOntBqfScgVeE-eWPOh51ObjVzsrk-1bo', '2021-03-30 20:59:13.346608');
 INSERT INTO `django_session` VALUES ('7e8u9n6x8ia8j51js7h384yn9webzz0u', '.eJxdj80OgjAQhN9lz8b-18LJk69BGrsaDFDSLsaE8O5WBA_edr-dnczM0Oami_d2gFodYJ2aKWOCeoZMU9MGqPVhHQffI9RAmEnDFxF2hQhTWeOMrZzZOPa-7XbtOeTbMYfbduv9I6Y_n4CjT_QHh1iA5MJyviP_9LQ-s2nsog_sE5V9KSuCgAMxwn5sJJeCK6GENieu1UkfH-N9c8n4KhaXbbv6VDqCVdJIY52rjFvrVHveSBR_0ZblDYPfYM4:1lLybw:ia4gm-DRZD59uHsbnAuU5j3KdPn0RkVceAey9aphU8U', '2021-03-30 09:35:04.340392');
-INSERT INTO `django_session` VALUES ('ig04k1agc8vr1qxobvwe1f91fdkv7l0b', 'eyJpc19sb2dpbiI6MCwibG9naW5fdXNlciI6IiJ9:1lM47x:obllMWGuHhzpDeuGvuEsrAHMb0XRqoGaeumFLFG_UAg', '2021-03-30 15:28:29.407939');
+INSERT INTO `django_session` VALUES ('ig04k1agc8vr1qxobvwe1f91fdkv7l0b', 'eyJpc19sb2dpbiI6MCwibG9naW5fdXNlciI6bnVsbH0:1lM8j5:kbkyC2yNPwQCtG-12D-ZslUJlAXlHUIJKLK_Om6Mfxw', '2021-03-30 20:23:07.017804');
+INSERT INTO `django_session` VALUES ('u5f90jk8lgx5cwwqkckpr22vcdg898xn', '.eJw1kE2OgzAMhe-SdVWcPydhNas5wyyQUIBQURWCIBmNVPXu41C6sRz7y7Ofn2za20e8TQur5YUdWZv3sLH6yfaU22lgtbkc6eLnwGrWZDsY3WTNcWDvTgoPanAtUCtjnVZnPcx-OjrScae0UNx8cZTXPs4nMft73A5Ro2UR7TQ0WY2BNxkBxxMbwuq39B7eeeo54L7QiJQjipNbIjECOAJ8Sv7Xp2NElddH9ENV3FXvakXAEJZUpTCvrQDBQXKkiNJwsNf7Gm6nzB7-SOP7fPV-o7swFKDpk3MWpLDSyp-PrZhSPNbVnQvlYiOZoz1HirYni87bnkwbThWjgGwYtIp4XRgVAAoJpty5R_Z6_QOVNYEj:1lM9Pb:zD6ngbu4mBCBEpqtjA2uBhhkOr5mLIVoBZHT0XpGrNM', '2021-03-30 21:07:03.204215');
 
 -- ----------------------------
 -- Table structure for tt_admin
@@ -281,7 +282,7 @@ CREATE TABLE `tt_admin`  (
 -- ----------------------------
 -- Records of tt_admin
 -- ----------------------------
-INSERT INTO `tt_admin` VALUES (1, '202085400189', '张三', 'caid', 1, '2021-03-16 16:13:21.460466', '/upload/user/avator/admin/temp_20210316161331919.jpeg');
+INSERT INTO `tt_admin` VALUES (1, '202085400189', '123456', 'caid', 1, '2021-03-16 20:59:13.344614', '/upload/user/avator/admin/default_avator.jpg');
 
 -- ----------------------------
 -- Table structure for tt_cert
@@ -305,7 +306,7 @@ CREATE TABLE `tt_cert`  (
 -- ----------------------------
 -- Records of tt_cert
 -- ----------------------------
-INSERT INTO `tt_cert` VALUES (1, '/upload/cert/template/temp_20210314175844767.png', '天梯赛', 1, 1, 1, 1, 1, 1, 1, 1);
+INSERT INTO `tt_cert` VALUES (1, '/upload/cert/template/temp_20210316205945047.png', '天梯赛', 1, 1, 1, 1, 1, 1, 1, 1);
 
 -- ----------------------------
 -- Table structure for tt_contest
@@ -344,11 +345,12 @@ DROP TABLE IF EXISTS `tt_group`;
 CREATE TABLE `tt_group`  (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `group_name` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `group_motto` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `group_conid` int(11) NOT NULL,
   PRIMARY KEY (`group_id`) USING BTREE,
   INDEX `tt_group_group_conid_45a8a042_fk_tt_contest_con_id`(`group_conid`) USING BTREE,
   CONSTRAINT `tt_group_group_conid_45a8a042_fk_tt_contest_con_id` FOREIGN KEY (`group_conid`) REFERENCES `tt_contest` (`con_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for tt_sign
@@ -373,7 +375,7 @@ CREATE TABLE `tt_sign`  (
   CONSTRAINT `tt_sign_sign_conid_70221c9b_fk_tt_contest_con_id` FOREIGN KEY (`sign_conid`) REFERENCES `tt_contest` (`con_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `tt_sign_sign_groupid_38801a33_fk_tt_group_group_id` FOREIGN KEY (`sign_groupid`) REFERENCES `tt_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `tt_sign_sign_stuid_ab78be5b_fk_tt_student_stu_id` FOREIGN KEY (`sign_stuid`) REFERENCES `tt_student` (`stu_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for tt_student
@@ -393,6 +395,6 @@ CREATE TABLE `tt_student`  (
   `stu_motto` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `stu_card` varchar(18) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`stu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;

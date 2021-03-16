@@ -120,7 +120,7 @@ class Admin_IndexView(View):
 
     def get(self, request):
         is_login = request.session.get('is_login')
-        if not is_login or is_login == 3:
+        if not is_login or is_login not in [1,2]:
             return render(request, 'admin/user/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/admin/index'})
         login_user_sess = request.session.get('login_user')
         print(is_login, login_user_sess)
@@ -141,6 +141,9 @@ class WelcomeView(View):
 
     @xframe_options_sameorigin
     def get(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': 'welcome'})
         stu_num = 0
         admin_num = 0
         contest_num = 0
@@ -171,7 +174,7 @@ class LogoutView(View):
         if is_login == 2 or is_login == 1:
             target = 'admin/user/login.html'
         request.session['is_login'] = 0  # 这个session是用于后面访问每个页面（即调用每个视图函数时要用到，即判断是否已经登录，用此判断）
-        request.session['login_user'] = ''
+        request.session['login_user'] = None
         return render(request, target, {'err_msg': '注销成功！'})
 
     def post(self, request):
@@ -187,6 +190,10 @@ class ListView(View):
         :param type: 查询的角色类别：1为管理员，2为学生
         :return:
         """
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html', {'err_msg': '您当前权限不够，请重新登录！', 'next': '/user/list/%s/' % role})
+
         pIndex = request.GET.get('cpage')
         search_dict = dict()
         # 如果有这个值 就写入到字典中去
@@ -231,6 +238,10 @@ class AddView(View):
 
     @xframe_options_sameorigin
     def get(self, request, role):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请重新登录！', 'next': '/user/add/%s/' % role})
         user_id = request.GET.get('user_id')
         user = None
         if role == '1':
@@ -250,6 +261,10 @@ class AddView(View):
 
     @xframe_options_sameorigin
     def post(self, request, role):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请重新登录！', 'next': '/user/list/%s/' % role})
         if role == '1':
             admin_account = request.POST.get('admin_account')
             admin_name = request.POST.get('admin_name')
@@ -332,6 +347,7 @@ class UploadAvatorView(View):
 
     @xframe_options_sameorigin
     def get(self, request):
+
         return render(request, 'admin/user/admin_add.html')
 
     @csrf_exempt
@@ -396,6 +412,9 @@ class ResetpwdView(View):
         pass
 
     def post(self, request, role):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         user_id = request.POST.get('user_id')
         try:
             if role == '1':
@@ -416,6 +435,10 @@ class Admin_PersonView(View):
 
     @xframe_options_sameorigin
     def get(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请重新登录！', 'next': '/user/person'})
         login_id = request.session.get('login_user')['admin_id']
         try:
             login_user = Admin.objects.get(admin_id=login_id)
@@ -432,6 +455,9 @@ class Admin_PersonView(View):
 class Stu_Query_PersonView(View):
 
     def get(self, request):
+        # is_login = request.session.get('is_login')
+        # if not is_login or is_login not in [1, 2]:
+        #     return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！', 'stu':''})
         user_id = request.GET.get('user_id')
         try:
             stu = Student.objects.get(stu_no=user_id)
@@ -454,6 +480,9 @@ class DelView(View):
         pass
 
     def post(self, request, role):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         user_id = request.POST.get('user_id')
         file_path = '%s\\user\\avator' % settings.UPLOAD_ROOT
         try:
@@ -704,6 +733,9 @@ class UploadStuView(View):
         pass
 
     def post(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         file = request.FILES.get('file')
         errorlist = list()
         file_path = settings.UPLOAD_ROOT + '\\user\\stu_info'

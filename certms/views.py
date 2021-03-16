@@ -21,6 +21,10 @@ class ListView(View):
 
     @xframe_options_sameorigin
     def get(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请重新登录！', 'next': '/cert/list'})
         pIndex = request.GET.get('cpage')
 
         search_dict = dict()
@@ -55,6 +59,10 @@ class AddView(View):
 
     @xframe_options_sameorigin
     def get(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请重新登录！', 'next': '/cert/add'})
         cert_id = request.GET.get('cert_id')
         cert = None
         if cert_id:
@@ -66,6 +74,9 @@ class AddView(View):
 
     @xframe_options_sameorigin
     def post(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         cert_name = request.POST.get('cert_name')
         cert_userx = request.POST.get('cert_userx')
         cert_usery = request.POST.get('cert_usery')
@@ -108,6 +119,9 @@ class DelView(View):
 
     @xframe_options_sameorigin
     def post(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         cert_id = request.POST.get('cert_id')
         file_path = '%s\\cert\\template' % settings.UPLOAD_ROOT
         try:

@@ -107,8 +107,8 @@
                                                 <i class="layui-icon">&#xe640;</i></a>
                                             <a title="查看" onclick="show_contest('{{ con.con_id }}')" href="javascript:;">
                                                  <i class="layui-icon">&#xe649;</i></a>
-                                            <a title="发通知" onclick="send_notice('{{ con.con_id }}')" href="javascript:;">
-                                                 <i class="layui-icon">&#xe667;</i></a>
+                                            {% comment %}<a title="发通知" onclick="send_notice('{{ con.con_id }}')" href="javascript:;">
+                                                 <i class="layui-icon">&#xe667;</i></a>{% endcomment %}
                                         </td>
                                     </tr>
                                     {%empty%}

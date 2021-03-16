@@ -61,8 +61,9 @@
                                 <thead>
                                     <tr>
                                         <th width="10%">编号</th>
-                                        <th width="40%">所属竞赛</th>
-                                        <th width="40%">名称</th>
+                                        <th width="30%">所属竞赛</th>
+                                        <th width="30%">名称</th>
+                                        <th width="20%">宣言</th>
                                         <th width="10%">操作</th></tr>
                                 </thead>
                                 <tbody>
@@ -71,6 +72,7 @@
                                         <td>{{ group.group_id }}</td>
                                         <td class="cus_con_td">{{ group.group_conid.con_name }}</td>
                                         <td class="cus_con_td">{{ group.group_name }}</td>
+                                        <td class="cus_con_td">{{ group.group_motto }}</td>
                                         <td class="td-manage">
                                             <a title="编辑" onclick="xadmin.open('编辑','/contest/group/add?group_id={{ group.group_id }}', 500, 250)" href="javascript:;">
                                                 <i class="layui-icon">&#xe63c;</i></a>

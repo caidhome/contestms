@@ -97,6 +97,10 @@ class AddView(View):
 
     @xframe_options_sameorigin
     def get(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请重新登录！', 'next': '/contest/add'})
         cert_list = Cert.objects.all()
         con_id = request.GET.get('con_id')
         contest = None
@@ -109,6 +113,9 @@ class AddView(View):
 
     @xframe_options_sameorigin
     def post(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         code = 6
         msg = '添加成功'
         is_login = request.session.get('is_login')
@@ -174,6 +181,9 @@ class DelView(View):
         pass
 
     def post(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         cid = request.POST.get('cid')
         try:
             contest = Contest.objects.get(con_id=cid)
@@ -195,8 +205,8 @@ class DetialView(View):
     def get(self, request, cid):
         is_login = request.session.get('is_login')
         login_user = request.session.get('login_user')
-        if not is_login or not login_user or is_login not in [1, 2, 3]:
-            return render(request, 'admin/user/login.html', {'err_msg': '您当前还未登录，请登录后重试。', 'next': '/contest/detial/%s/'%cid})
+        # if not is_login or not login_user or is_login not in [1, 2, 3]:
+        #     return render(request, 'admin/user/login.html', {'err_msg': '您当前还未登录，请登录后重试。', 'next': '/contest/detial/%s/'%cid})
 
         contest = None
         try:
@@ -354,6 +364,9 @@ class UploadScoreView(View):
         pass
 
     def post(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         file = request.FILES.get('file')
         con_id_str = request.POST.get('con_id')
         errorlist = list()
@@ -450,6 +463,9 @@ class Sign_List_View(View):
 
     @xframe_options_sameorigin
     def get(self, request, cid):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         try:
             cur_con = Contest.objects.get(con_id=cid)
             msg = '查询成功'
@@ -477,10 +493,14 @@ class Sign_List_View(View):
             else:
                 s_item['sign_state'] = '正常'
 
-            group = '未分组'
+            group_name = '未分组'
+            sign_group_motto = '无'
             if s_item['sign_groupid_id']:
-                group = Group.objects.get(group_id=s_item['sign_groupid_id']).group_name
-            s_item['sign_group'] = group
+                group = Group.objects.get(group_id=s_item['sign_groupid_id'])
+                group_name = group.group_name
+                sign_group_motto = group.group_motto
+            s_item['sign_group'] = group_name
+            s_item['sign_group_motto'] = sign_group_motto
 
             sex_dict = {'F': '男', 'M': '女'}
             try:
@@ -630,21 +650,23 @@ class Sign_GenCert_View(View):
     def post(self, request, cid, sid):
         host_url = '%s://%s' % (request.META['wsgi.url_scheme'], request.META['HTTP_HOST'])
         # 批量生成
-        msg = "生成失败！"
+        msg = "生成成功！"
         response_data = {
-            "code": 2
+            "code": 6
             , "msg": msg
             , 'url': ''
         }
         if sid == '0':
-            sign_list = Sign.objects.filter(sign_conid_id=cid).values('sign_id', 'sign_conid_id', 'sign_stuid_id')
+            sign_list = Sign.objects.filter(sign_conid_id=cid).values('sign_id', 'sign_conid_id', 'sign_stuid_id', 'sign_level', 'sign_total')
             # err_list = list()
             err_list = ''
             for sign in sign_list:
+                if not sign['sign_level'] or sign['sign_total'] < 0:
+                    continue
                 response_data = self.gen_single(host_url, sign['sign_conid_id'], sign['sign_stuid_id'])
                 if response_data['code'] == 3:
                     err_list = err_list + str(response_data['err_sid']) + ','
-                    response_data['msg'] = '部分学生再无成绩信息，请上传成绩后再试！无成绩学生ID：%s' % err_list[:-1]
+                    response_data['msg'] = '部分学生暂无成绩或等级信息，请上传后再试！无证书数据学生ID：%s' % err_list[:-1]
                     response_data['code'] = 2
         else:
             response_data = self.gen_single(host_url, cid, sid)
@@ -662,10 +684,11 @@ class Sign_GenCert_View(View):
             return {"msg": '暂无当前学生或竞赛信息<br>生成失败，学生ID：%d' % sid, "code": 2}
         if sign_list and len(sign_list) > 0:
             sign_obj = sign_list[0]
-            if sign_obj.sign_state != 3:
-                return {"msg": '当前学生暂无成绩信息<br>生成失败，学生ID：%d' % sid, "code": 3, 'url': "", 'err_sid': stu.stu_id}
+            if sign_obj.sign_state != 3 or not sign_obj.sign_level or sign_obj.sign_total < 0:
+                return {"msg": '当前学生暂无证书数据<br>生成失败，学生ID：%d' % sid, "code": 3, 'url': "", 'err_sid': stu.stu_id}
         else:
             return {"msg": '暂无当前报名信息，生成失败学生名称：'+stu.stu_name, "code": 2, 'url': ""}
+
         cert_obj = contest.con_certid
         cert_dir = '%s/cert/generate/%s/' % (settings.DOWNLOAD_ROOT, contest.con_id)
         temp_dir = '%s/cert/temp' % (settings.DOWNLOAD_ROOT)
@@ -797,6 +820,8 @@ class Downzip_Certs_View(View):
             return HttpResponse("证书尚未生成！")
 
         cert_zip_dir = '%s/cert/generate/zip' % (settings.DOWNLOAD_ROOT)
+        if not os.path.exists(cert_zip_dir):
+            os.makedirs(cert_zip_dir)
         zipFilePath = os.path.join(cert_zip_dir, "cert_%s.zip"%cid)
         zipFile = zipfile.ZipFile(zipFilePath, "w", zipfile.ZIP_DEFLATED)
         os.chdir(absDir)
@@ -940,6 +965,10 @@ class GroupAddView(View):
 
     @xframe_options_sameorigin
     def get(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return render(request, 'admin/user/login.html',
+                          {'err_msg': '您当前权限不够，请重新登录！', 'next': '/contest/group/add'})
         group_id = request.GET.get("group_id")
         group = None
         if group_id:
@@ -948,11 +977,15 @@ class GroupAddView(View):
         return render(request, 'admin/group/group_add.html', {'con_list': con_list, 'group': group})
 
     def post(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         msg = '添加成功！'
         group_id = request.POST.get("group_id")
         group_name = request.POST.get("group_name")
+        group_motto = request.POST.get("group_motto")
         group_conid = request.POST.get('group_conid')
-        group = Group(group_name=group_name, group_conid_id=group_conid)
+        group = Group(group_name=group_name, group_motto=group_motto, group_conid_id=group_conid)
         if group_id:
             group.group_id = group_id
             msg = '更新成功！'
@@ -966,6 +999,9 @@ class GroupDelView(View):
         pass
 
     def post(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
         gid = request.POST.get('group_id')
         try:
             group = Group.objects.get(group_id=gid)
@@ -1120,43 +1156,25 @@ class Downzip_Avator_View(View):
                             content = f_r.read()
                         with open(os.path.join(avator_part_dir, group.group_name, '%s_%s%s' % (stu_group.stu_no, stu_group.stu_name, os.path.splitext(os.path.basename(stu_group.stu_avator))[1])), 'wb') as f_w:
                             f_w.write(content)
-            sign_group_list = Sign.objects.filter(sign_conid_id=cid, sign_groupid_id__isnull=True)
-            if not os.path.exists(os.path.join(avator_part_dir, '未分组')):
-                os.makedirs(os.path.join(avator_part_dir, '未分组'))
+            sign_ungroup_list = Sign.objects.filter(sign_conid_id=cid, sign_groupid_id__isnull=True)
+            if sign_ungroup_list and len(sign_ungroup_list) > 0:
+                if not os.path.exists(os.path.join(avator_part_dir, '未分组')):
+                    os.makedirs(os.path.join(avator_part_dir, '未分组'))
+                for ungroup in sign_ungroup_list:
+                    stu_group = Student.objects.get(stu_id=ungroup.sign_stuid_id)
+                    with open(os.path.join(settings.BASE_DIR, 'static', stu_group.stu_avator[1:]), 'rb') as f_r:
+                        content = f_r.read()
+                    with open(os.path.join(avator_part_dir, '未分组', '%s_%s%s' % (
+                    stu_group.stu_no, stu_group.stu_name, os.path.splitext(os.path.basename(stu_group.stu_avator))[1])),
+                              'wb') as f_w:
+                        f_w.write(content)
+
+
 
             os.chdir(avator_part_dir)
             Downzip_Certs_View().writeAllFileToZip(avator_part_dir, zipFile)  # 递归操作
 
         zipFile.close()
-            # for f in os.listdir(avator_part_dir):
-            #     absFile = os.path.join(avator_part_dir, f)  # 子文件的绝对路径
-            #     if os.path.isdir(absFile):  # 判断是文件夹，继续深度读取。
-            #         relFile = absFile[len(avator_part_dir) + 1:]  # 改成相对路径，否则解压zip是/User/xxx开头的文件。
-            #         zipFile.write(relFile)  # 在zip文件中创建文件夹
-            #         Downzip_Certs_View().writeAllFileToZip(avator_part_dir, zipFile)  # 递归操作
-            #     else:  # 判断是普通文件，直接写到zip文件中。
-            #         relFile = absFile[len(avator_part_dir) + 1:]  # 改成相对路径
-            #         zipFile.write(relFile)
-            # zipFile.close()
-
-            # for group in group_list:
-            #     sign_group_list = Sign.objects.filter(sign_conid_id=cid, sign_groupid_id=group.group_id)
-            #     os.makedirs(os.path.join(cert_zip_dir, group.group_name))
-            #     zipFile.write('%s/' % group.group_name)
-            #     if sign_group_list and len(sign_group_list) > 0:
-            #         for sign_group in sign_group_list:
-            #             stu_group = Student.objects.get(stu_id=sign_group.sign_stuid_id)
-            #             if stu_group.stu_avator != '/upload/user/avator/student/default_avator.jpg':
-            #                 has_custom_avator = False
-            #                 # avator_file_list.append(stu.stu_avator)
-            #                 absFile = os.path.join(settings.BASE_DIR, 'static', stu_group.stu_avator[1:])
-            #                 # if not os.path.isdir():
-            #                 relFile = absFile[len(absDir):]  # 改成相对路径
-            #                 zipFile.write(relFile)
-
-
-
-
 
         if has_custom_avator:
             return HttpResponse("暂无头像信息！")
@@ -1183,6 +1201,10 @@ class Sign_DelList_View(View):
         pass
 
     def post(self, request):
+        is_login = request.session.get('is_login')
+        if not is_login or is_login not in [1, 2]:
+            return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！'})
+
         ids = request.POST.getlist('ids')
         code = 6
         msg = '删除成功！'
