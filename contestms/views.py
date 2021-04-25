@@ -17,7 +17,7 @@ from django.http import JsonResponse
 from TiantiMS import settings
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
-# Create your views here.
+
 
 class ListView(View):
 
@@ -35,9 +35,7 @@ class ListView(View):
             print(ex)
             return render(request, 'admin/user/login.html',
                           {'err_msg': '您当前权限不够，请登录后重试。', 'next': '/contest/list'})
-
         pIndex = request.GET.get('cpage')
-
         search_dict = dict()
         search_dict['con_createrid__admin_id'] = loginUser.admin_id
         # 如果有这个值 就写入到字典中去
@@ -60,8 +58,8 @@ class ListView(View):
         if end:
             search_dict['con_time__lte'] = end
         else:
-            end=''
-        res = Contest.objects.filter(** search_dict).order_by('con_id')
+            end = ''
+        res = Contest.objects.filter(**search_dict).order_by('con_id')
 
         paginator = Paginator(res, 10)
         try:
@@ -80,7 +78,7 @@ class ListView(View):
             'res': list_page,
             'tpage': len(totol_page),
             'cpage': pIndex,
-            'filt':{
+            'filt': {
                 'con_level': con_level,
                 'con_id': con_id,
                 'start': start,
@@ -175,6 +173,7 @@ class AddView(View):
             , "msg": msg
         })
 
+
 class DelView(View):
 
     def get(self, request):
@@ -199,15 +198,13 @@ class DelView(View):
         }
         return JsonResponse(response_data)
 
+
 class DetialView(View):
 
     @xframe_options_sameorigin
     def get(self, request, cid):
         is_login = request.session.get('is_login')
         login_user = request.session.get('login_user')
-        # if not is_login or not login_user or is_login not in [1, 2, 3]:
-        #     return render(request, 'admin/user/login.html', {'err_msg': '您当前还未登录，请登录后重试。', 'next': '/contest/detial/%s/'%cid})
-
         contest = None
         try:
             contest = Contest.objects.get(con_id=cid)
@@ -221,18 +218,6 @@ class DetialView(View):
         cur_sign = None
         if is_login and is_login in [1, 2]:
             groups = Group.objects.filter(group_conid__con_id=contest.con_id)
-            # group_list = list()
-            # for group in groups:
-            #     g_dict = dict()
-            #     g_dict['group'] = group
-            #     sign_list = Sign.objects.filter(sign_groupid__group_id=group.group_id)
-            #     stu_list = list()
-            #     for sign in sign_list:
-            #         print(sign.sign_stuid_id)
-            #         stu_list.append(Student.objects.get(stu_id=sign.sign_stuid_id))
-            #     g_dict['stu'] = stu_list
-            #     group_list.append(g_dict)
-
             group_dict = dict()
             for group in groups:
                 sign_list = Sign.objects.filter(sign_groupid__group_id=group.group_id)
@@ -244,8 +229,6 @@ class DetialView(View):
         else:
             stu = None
             login_user = request.session.get('login_user')
-            # if not is_login or not login_user or is_login == 0:
-            #     return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请登录后重试。', 'next': '/contest/detial/%s/'%cid})
             if login_user:
                 try:
                     stu = Student.objects.get(stu_id=login_user['stu_id'])
@@ -254,14 +237,12 @@ class DetialView(View):
                         cur_sign = sign[0]
                 except Exception as ex:
                     print(ex)
-            # contest.sign = True
-            # contest.state = sign[0].sign_state
-            # return render(request, 'student/contest_detial.html', {'con': contest, 'sign': sign[0], 'next': '/contest/detial'})
         return render(request, 'student/contest_detial.html', {'con': contest, 'sign': cur_sign})
 
     @xframe_options_sameorigin
     def post(self, request, cid):
         pass
+
 
 class HeadView(View):
 
@@ -272,6 +253,7 @@ class HeadView(View):
     @xframe_options_sameorigin
     def post(self, request):
         pass
+
 
 class Sign_Person_View(View):
 
@@ -292,6 +274,7 @@ class Sign_Person_View(View):
     def post(self, request):
         pass
 
+
 class SignView(View):
 
     @xframe_options_sameorigin
@@ -299,7 +282,8 @@ class SignView(View):
         is_login = request.session.get('is_login')
         login_user = request.session.get('login_user')
         if not is_login or not login_user:
-            return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/contest/sign/%s/' % cid})
+            return render(request, 'student/login.html',
+                          {'err_msg': '您当前还未登录，请先登录！', 'next': '/contest/sign/%s/' % cid})
         contest = None
         try:
             contest = Contest.objects.get(con_id=cid)
@@ -338,7 +322,8 @@ class SignView(View):
         if sign_list and len(sign_list) > 0:
             return JsonResponse({'code': 2, 'msg': '您已报名！'})
 
-        sign = Sign(sign_lang=sign_lang, sign_state=0, sign_conid_id=con.con_id, sign_teach=sign_teach, sign_stuid=cur_stu)
+        sign = Sign(sign_lang=sign_lang, sign_state=0, sign_conid_id=con.con_id, sign_teach=sign_teach,
+                    sign_stuid=cur_stu)
         sign.save()
 
         # 发邮件
@@ -346,7 +331,9 @@ class SignView(View):
         subject = '竞赛管理系统-报名成功'
         text_content = '这是一封重要的邮件.'
         html_content = '<p style="font-size: 18px;"><strong>%s</strong> 同学, 恭喜你：<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;你报名的 <strong><a href="%s/contest/detial/%s/">%s</a></strong> 报名成功' \
-                       '具体报名信息请查看<a href="%s/user/student/%s/">个人主页</a>。</p>' % (cur_stu.stu_name, settings.PRO_HOST_URL, con.con_id, con.con_name, settings.PRO_HOST_URL, cur_stu.stu_id)
+                       '具体报名信息请查看<a href="%s/user/student/%s/">个人主页</a>。</p>' % (
+                       cur_stu.stu_name, settings.PRO_HOST_URL, con.con_id, con.con_name, settings.PRO_HOST_URL,
+                       cur_stu.stu_id)
         send_msg = EmailMultiAlternatives(subject, text_content, from_email, [stu[0].stu_email])
         send_msg.attach_alternative(html_content, "text/html")
         send_msg.send()
@@ -356,6 +343,7 @@ class SignView(View):
             , "msg": msg
         }
         return JsonResponse(response_data)
+
 
 # 报名状态：0 报名成功，1 弃赛（未审核） 2 弃赛  3 上传成绩 4 证书生成
 class UploadScoreView(View):
@@ -394,7 +382,8 @@ class UploadScoreView(View):
 
             row_num = sheet_1.nrows  # 获取行数
             head_cols = sheet_1.row_values(0)
-            head_dict = {col_index: "".join(str(head_cols[col_index]).split()) for col_index in range(5, len(head_cols))}
+            head_dict = {col_index: "".join(str(head_cols[col_index]).split()) for col_index in
+                         range(5, len(head_cols))}
             report_num = sheet_1.ncols  # 获取列数
             print(report_num)
             if report_num != 10:
@@ -410,7 +399,8 @@ class UploadScoreView(View):
                 stu_major = "".join(str(row[3]).split())
                 stu_teach = "".join(str(row[4]).split())
                 # print('no:', stu_no, 'name: ', stu_name, 'depart: ', stu_depart, 'major: ', stu_major)
-                cur_stu_list = Student.objects.filter(stu_no=stu_no, stu_name=stu_name, stu_depart=stu_depart, stu_major=stu_major)
+                cur_stu_list = Student.objects.filter(stu_no=stu_no, stu_name=stu_name, stu_depart=stu_depart,
+                                                      stu_major=stu_major)
                 # print(cur_stu_list)
                 # print(cur_stu_list.query.__str__())
                 # print(len(cur_stu_list))
@@ -436,7 +426,7 @@ class UploadScoreView(View):
                         errorlist.append("%d:%s,总分数据为：%s（数据格式错误）<br/>" % (stu_no, stu_name, score_str))
                     detial = ''
                     for item in range(7, len(row)):
-                        itemstr = head_dict[item] + '=' + "".join(str(row[item]).split())+'&'
+                        itemstr = head_dict[item] + '=' + "".join(str(row[item]).split()) + '&'
                         detial = detial + itemstr
                     cur_sign.sign_detial = detial[:-1]
                     cur_sign.sign_total = total_score
@@ -482,12 +472,17 @@ class Sign_List_View(View):
         sign_list = Sign.objects.filter(sign_conid=cur_con).order_by('sign_groupid')
 
         data = list(sign_list.values())
+
+        s_index = 1
         for s_item in data:
             temp_obj = dict(s_item)
-
+            s_item['s_index'] = s_index
+            s_index = s_index+1
             sign_state = temp_obj['sign_state']
             if sign_state == 1:
-                s_item['sign_state'] = '<a style="color: red" href="javascript:void(0);" onclick=checkState(%s)>待审核</a>'%s_item['sign_id']
+                s_item[
+                    'sign_state'] = '<a style="color: red" href="javascript:void(0);" onclick=checkState(%s)>待审核</a>' % \
+                                    s_item['sign_id']
             elif sign_state == 2:
                 s_item['sign_state'] = '弃赛'
             else:
@@ -510,21 +505,11 @@ class Sign_List_View(View):
                 s_item['sign_sex'] = sex_dict[student.stu_sex]
                 s_item['sign_major'] = student.stu_major
                 s_item['sign_motto'] = student.stu_motto
-                s_item['sign_tel'] = student.stu_tel
-                s_item['sign_card'] = student.stu_card
+                s_item['sign_tel'] = student.stu_tel + '\t'
+                s_item['sign_card'] = student.stu_card + '\t'
                 s_item['sign_email'] = student.stu_email
             except Exception as ex:
                 print(ex)
-
-            """
-            <th lay-data="{field:'sign_sex', width:100, hide: true">性别</th>
-                                            <th lay-data="{field:'sign_major', width:100, hide: true">专业</th>
-                                            <th lay-data="{field:'sign_motto', width:100, hide: true">个人宣言</th>
-                                            <th lay-data="{field:'sign_tel', width:100, hide: true">电话</th>
-                                            <th lay-data="{field:'sign_card', width:100, hide: true">身份证</th>
-                                            <th lay-data="{field:'sign_email', width:100, hide: true">邮箱</th>
-            """
-
             if temp_obj['sign_detial']:
                 detial_arr = temp_obj['sign_detial'].split('&')
                 detial = dict()
@@ -535,10 +520,10 @@ class Sign_List_View(View):
                 s_item['sign_detial'] = str(detial)
 
         response_data = {
-           "code": 0
-          ,"msg": ""
-          ,"count": len(sign_list)
-          ,"data": data
+            "code": 0
+            , "msg": ""
+            , "count": len(sign_list)
+            , "data": data
         }
 
         return JsonResponse(response_data)
@@ -546,12 +531,12 @@ class Sign_List_View(View):
     def post(self, request, cid):
         pass
 
+
 class Sign_Check_View(View):
 
     @xframe_options_sameorigin
     def get(self, request, cid):
         pass
-
 
     def post(self, request, sid):
         is_login = request.session.get('is_login')
@@ -585,6 +570,7 @@ class Sign_Check_View(View):
         }
         return JsonResponse(response_data)
 
+
 class Sign_Score_View(View):
 
     def get(self, request, cid):
@@ -609,7 +595,7 @@ class Sign_Score_View(View):
                     num = num + 1
                     d_title = d_item.split('=')[0]
                     d_score = d_item.split('=')[1]
-                    detial_res = detial_res + d_title +': ' + d_score
+                    detial_res = detial_res + d_title + ': ' + d_score
                     if num % 2 != 0:
                         detial_res = detial_res + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                     else:
@@ -637,7 +623,6 @@ class Sign_Score_View(View):
         }
         return JsonResponse(response_data)
 
-
     def post(self, request, sid):
         pass
 
@@ -657,7 +642,8 @@ class Sign_GenCert_View(View):
             , 'url': ''
         }
         if sid == '0':
-            sign_list = Sign.objects.filter(sign_conid_id=cid).values('sign_id', 'sign_conid_id', 'sign_stuid_id', 'sign_level', 'sign_total')
+            sign_list = Sign.objects.filter(sign_conid_id=cid).values('sign_id', 'sign_conid_id', 'sign_stuid_id',
+                                                                      'sign_level', 'sign_total')
             # err_list = list()
             err_list = ''
             for sign in sign_list:
@@ -672,7 +658,7 @@ class Sign_GenCert_View(View):
             response_data = self.gen_single(host_url, cid, sid)
         return JsonResponse(response_data)
 
-    def gen_single(self,host_url, cid, sid):
+    def gen_single(self, host_url, cid, sid):
         msg = '生成成功'
         code = 6
         sign_list = Sign.objects.filter(sign_conid_id=cid, sign_stuid_id=sid)
@@ -687,7 +673,7 @@ class Sign_GenCert_View(View):
             if sign_obj.sign_state != 3 or not sign_obj.sign_level or sign_obj.sign_total < 0:
                 return {"msg": '当前学生暂无证书数据<br>生成失败，学生ID：%d' % sid, "code": 3, 'url': "", 'err_sid': stu.stu_id}
         else:
-            return {"msg": '暂无当前报名信息，生成失败学生名称：'+stu.stu_name, "code": 2, 'url': ""}
+            return {"msg": '暂无当前报名信息，生成失败学生名称：' + stu.stu_name, "code": 2, 'url': ""}
 
         cert_obj = contest.con_certid
         cert_dir = '%s/cert/generate/%s/' % (settings.DOWNLOAD_ROOT, contest.con_id)
@@ -702,39 +688,30 @@ class Sign_GenCert_View(View):
         if not os.path.exists(cert_dir):
             os.makedirs(cert_dir)
 
-
-        cert_url = '%s/static/download/cert/generate/%s/png/cert_%s_%d.png' % (host_url, contest.con_id, stu.stu_no, contest.con_id)
-        # print(cert_url)
+        cert_url = '%s/static/download/cert/generate/%s/png/cert_%s_%d.png' % (
+        host_url, contest.con_id, stu.stu_no, contest.con_id)
         # 生成图片
         if not os.path.exists(img_png_path):
-            # /upload/cert/template//temp_20210117193625270.jpg
-            old_img = Image.open("%s%s" % (os.path.join(settings.BASE_DIR,'static'), cert_obj.cert_imgurl))
-            # old_img = Image.open("%s/reward_44.png" % cert_dir)
+            old_img = Image.open("%s%s" % (os.path.join(settings.BASE_DIR, 'static'), cert_obj.cert_imgurl))
             draw = ImageDraw.Draw(old_img)
             # 设置图片文字，字体类型，以及字体大小，颜色
             newfont = ImageFont.truetype('%s/simhei.ttf' % temp_dir, 75)
             simsun = ImageFont.truetype('%s/simsun.ttf' % temp_dir, 75)
             # 写学生信息
             draw.text((cert_obj.cert_userx, cert_obj.cert_usery), stu.stu_name, font=newfont, fill="black")
-
             # 写证书等级
             simsun_level = ImageFont.truetype('%s/simhei.ttf' % temp_dir, 110)
-            draw.text((cert_obj.cert_levelx, cert_obj.cert_levely), sign_obj.sign_level, font=simsun_level, fill="black")
-
+            draw.text((cert_obj.cert_levelx, cert_obj.cert_levely), sign_obj.sign_level, font=simsun_level,
+                      fill="black")
             # 写指导教师
             if sign_obj.sign_teach:
                 simsun_teach = ImageFont.truetype('%s/simhei.ttf' % temp_dir, 80)
-                draw.text((cert_obj.cert_teachx, cert_obj.cert_teachy), '指导教师：%s'%(sign_obj.sign_teach), font=simsun_teach, fill="black")
-
-            # rand_name = 'cert_%s' % (datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[0:17])
-
+                draw.text((cert_obj.cert_teachx, cert_obj.cert_teachy), '指导教师：%s' % (sign_obj.sign_teach),
+                          font=simsun_teach, fill="black")
             # 转pdf  1代表比赛id  我默认将ccf比赛的id置为1
-            # /download/cert/generate/1/
-
             # 生成二维码
             qr = qrcode.QRCode(box_size=10, border=0)
             # 添加二维码的显示信息
-
             qr.add_data(cert_url)
             qr.make(fit=True)
             qr_img = qr.make_image()
@@ -748,7 +725,8 @@ class Sign_GenCert_View(View):
         else:
             old_img = (Image.open(img_png_path))
         if not sign_obj.sign_certpath:
-            sign_obj.sign_certpath = '/download/cert/generate/%s/png/cert_%s_%d.png' % (contest.con_id, stu.stu_no, contest.con_id)
+            sign_obj.sign_certpath = '/download/cert/generate/%s/png/cert_%s_%d.png' % (
+            contest.con_id, stu.stu_no, contest.con_id)
             sign_obj.save()
         # 生成pdf
         if not os.path.exists(img_pdf_path):
@@ -767,6 +745,7 @@ class Sign_GenCert_View(View):
             , 'url': cert_url
         }
         return response_data
+
 
 class Cert_download_View(View):
 
@@ -803,7 +782,6 @@ class Template_download_View(View):
             print(ex)
         return HttpResponse('下载错误！')
 
-
     def post(self, request):
         pass
 
@@ -822,7 +800,7 @@ class Downzip_Certs_View(View):
         cert_zip_dir = '%s/cert/generate/zip' % (settings.DOWNLOAD_ROOT)
         if not os.path.exists(cert_zip_dir):
             os.makedirs(cert_zip_dir)
-        zipFilePath = os.path.join(cert_zip_dir, "cert_%s.zip"%cid)
+        zipFilePath = os.path.join(cert_zip_dir, "cert_%s.zip" % cid)
         zipFile = zipfile.ZipFile(zipFilePath, "w", zipfile.ZIP_DEFLATED)
         os.chdir(absDir)
         for f in os.listdir(absDir):
@@ -836,7 +814,6 @@ class Downzip_Certs_View(View):
                 zipFile.write(relFile)
         zipFile.close()
         try:
-            # /download/cert/generate/1/png/cert_2016001_1.png
             file = open(zipFilePath, 'rb')
             response = HttpResponse(file)
             response['Content-Type'] = 'application/zip'  # 设置头信息，告诉浏览器这是个文件
@@ -871,9 +848,6 @@ class SendNoticeView(View):
 
     def post(self, request, cid):
         redis_client = get_redis_connection('code')
-        # con_send_state = redis_client.get('tts_con_sendnotice_state_' + cid)
-        # if con_send_state and con_send_state.decode() == '1':
-        #     return JsonResponse({'code': 2, 'msg': '通知已发送，请勿重复发送！'})
         code = 6
         msg = '通知群发成功！'
         email_list = list()
@@ -887,7 +861,7 @@ class SendNoticeView(View):
             return JsonResponse({'code': 2, 'msg': '暂无该竞赛！'})
         try:
             stu_list = Student.objects.all()
-            if stu_list and len(stu_list)>0:
+            if stu_list and len(stu_list) > 0:
                 for stu_item in stu_list:
                     if stu_item.stu_email:
                         email_list.append(stu_item.stu_email)
@@ -900,8 +874,8 @@ class SendNoticeView(View):
         text_content = ''
         html_content = '<p style="font-size: 18px;"><strong></strong> 同学, 你好：<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;天梯赛管理系统刚刚发布了 <strong><a href="%s/contest/detial/%s/">%s</a></strong>' \
                        '，赶紧去报名吧！<br/>具体报名信息请查看<a href="%s/contest/detial/%s/">竞赛详情</a>吧。</p>' % (
-                       settings.PRO_HOST_URL, cid, con.con_name, settings.PRO_HOST_URL,
-                       cid)
+                           settings.PRO_HOST_URL, cid, con.con_name, settings.PRO_HOST_URL,
+                           cid)
         send_msg = EmailMultiAlternatives(subject, text_content, from_email, email_list)
         send_msg.attach_alternative(html_content, "text/html")
         send_msg.send()
@@ -911,13 +885,6 @@ class SendNoticeView(View):
             , "msg": msg
         }
         return JsonResponse(response_data)
-
-
-
-
-
-
-
 
 
 # group 管理
@@ -955,7 +922,6 @@ class GroupListView(View):
             }
         }
         return render(request, 'admin/group/group_list.html', rep_data)
-
 
     def post(self, request):
         pass
@@ -1018,6 +984,7 @@ class GroupDelView(View):
         }
         return JsonResponse(response_data)
 
+
 class GroupManageView(View):
 
     @xframe_options_sameorigin
@@ -1039,21 +1006,12 @@ class GroupManageView(View):
                 stu_list.append(s_stu)
             if sign.sign_groupid_id == int(gid):
                 stu_grouped.append(s_stu.stu_id)
-        # stu_dict = dict()
-        # stu_grouped = list()
-        # stu_ungroup = list()
-        # for sign in sign_list:
-        #     if sign.sign_groupid:
-        #         stu_grouped.append(Student.objects.get(stu_id=sign.sign_stuid_id))
-        #     else:
-        #         stu_ungroup.append(Student.objects.get(stu_id=sign.sign_stuid_id))
-        # stu_dict['grouped'] = stu_grouped
-        # stu_dict['ungroup'] = stu_ungroup
-        # print(stu_dict)
-        return render(request, 'admin/group/group_manage.html', {'group': group, 'stu_list': stu_list, 'grouped': stu_grouped})
+        return render(request, 'admin/group/group_manage.html',
+                      {'group': group, 'stu_list': stu_list, 'grouped': stu_grouped})
 
     def post(self, request):
         pass
+
 
 class GroupPartView(View):
 
@@ -1085,16 +1043,6 @@ class GroupPartView(View):
                 cur_sign_del.sign_groupid = None
                 cur_sign_del.save()
                 msg = '删除成功'
-
-        # try:
-        #     group = Group.objects.get(group_id=gid)
-        #     group.delete()
-        #     code = 6
-        #     msg = '删除成功'
-        # except Exception as ex:
-        #     code = 2
-        #     print(ex)
-        #     msg = '删除失败'
         response_data = {
             "code": code
             , "msg": msg
@@ -1118,7 +1066,6 @@ class Downzip_Avator_View(View):
         if not os.path.exists(cert_zip_dir):
             os.makedirs(cert_zip_dir)
 
-
         absDir = '%s/user/avator/student/' % (settings.UPLOAD_ROOT)
         zipFilePath = os.path.join(cert_zip_dir, "avator_%s.zip" % cid)
         zipFile = zipfile.ZipFile(zipFilePath, "w", zipfile.ZIP_DEFLATED)
@@ -1141,7 +1088,8 @@ class Downzip_Avator_View(View):
                     zipFile.write(relFile)
         else:
             group_list = Group.objects.filter(group_conid_id=cid)
-            avator_part_dir = '%s/contest/avator_export/file/%s/%s' % (settings.DOWNLOAD_ROOT, type_str[int(export_type)], cid)
+            avator_part_dir = '%s/contest/avator_export/file/%s/%s' % (
+            settings.DOWNLOAD_ROOT, type_str[int(export_type)], cid)
             for group in group_list:
                 sign_group_list = Sign.objects.filter(sign_conid_id=cid, sign_groupid_id=group.group_id)
                 if not os.path.exists(os.path.join(avator_part_dir, group.group_name)):
@@ -1149,12 +1097,16 @@ class Downzip_Avator_View(View):
                 if sign_group_list and len(sign_group_list) > 0:
                     for sign_group in sign_group_list:
                         stu_group = Student.objects.get(stu_id=sign_group.sign_stuid_id)
-                        if not stu_group.stu_avator or not os.path.exists(os.path.join(settings.BASE_DIR, 'static', stu_group.stu_avator[1:])) or stu_group.stu_avator == '/upload/user/avator/student/default_avator.jpg':
+                        if not stu_group.stu_avator or not os.path.exists(os.path.join(settings.BASE_DIR, 'static',
+                                                                                       stu_group.stu_avator[
+                                                                                       1:])) or stu_group.stu_avator == '/upload/user/avator/student/default_avator.jpg':
                             continue
                         has_custom_avator = False
                         with open(os.path.join(settings.BASE_DIR, 'static', stu_group.stu_avator[1:]), 'rb') as f_r:
                             content = f_r.read()
-                        with open(os.path.join(avator_part_dir, group.group_name, '%s_%s%s' % (stu_group.stu_no, stu_group.stu_name, os.path.splitext(os.path.basename(stu_group.stu_avator))[1])), 'wb') as f_w:
+                        with open(os.path.join(avator_part_dir, group.group_name, '%s_%s%s' % (
+                        stu_group.stu_no, stu_group.stu_name,
+                        os.path.splitext(os.path.basename(stu_group.stu_avator))[1])), 'wb') as f_w:
                             f_w.write(content)
             sign_ungroup_list = Sign.objects.filter(sign_conid_id=cid, sign_groupid_id__isnull=True)
             if sign_ungroup_list and len(sign_ungroup_list) > 0:
@@ -1165,11 +1117,10 @@ class Downzip_Avator_View(View):
                     with open(os.path.join(settings.BASE_DIR, 'static', stu_group.stu_avator[1:]), 'rb') as f_r:
                         content = f_r.read()
                     with open(os.path.join(avator_part_dir, '未分组', '%s_%s%s' % (
-                    stu_group.stu_no, stu_group.stu_name, os.path.splitext(os.path.basename(stu_group.stu_avator))[1])),
+                            stu_group.stu_no, stu_group.stu_name,
+                            os.path.splitext(os.path.basename(stu_group.stu_avator))[1])),
                               'wb') as f_w:
                         f_w.write(content)
-
-
 
             os.chdir(avator_part_dir)
             Downzip_Certs_View().writeAllFileToZip(avator_part_dir, zipFile)  # 递归操作
@@ -1184,7 +1135,8 @@ class Downzip_Avator_View(View):
             file = open(zipFilePath, 'rb')
             response = HttpResponse(file)
             response['Content-Type'] = 'application/zip'  # 设置头信息，告诉浏览器这是个文件
-            rand_name = 'avator_%s_%s' % (type_str[int(export_type)], datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[0:17])
+            rand_name = 'avator_%s_%s' % (
+            type_str[int(export_type)], datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[0:17])
             response['Content-Disposition'] = 'attachment;filename="%s.zip"' % rand_name
             return response
         except Exception as ex:
@@ -1219,4 +1171,4 @@ class Sign_DelList_View(View):
         if len(error_list) > 0:
             code = 2
             msg = '删除失败，失败学生ID：' + error_list[:-1]
-        return JsonResponse({'code': code, 'msg': msg })
+        return JsonResponse({'code': code, 'msg': msg})

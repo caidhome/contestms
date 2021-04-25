@@ -1,21 +1,14 @@
+# coding=utf-8
 import datetime
 import os
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-# import xlrd
 from django.shortcuts import render, redirect, HttpResponse
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
-# from xlwt import Workbook
 from django.views.decorators.clickjacking import xframe_options_sameorigin
-
 from certms.models import Cert
-from userms.models import Admin, Student
-from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.http import JsonResponse
-from django.db.models import Q
 from TiantiMS import settings
-import time
+
 
 class ListView(View):
 
@@ -26,11 +19,9 @@ class ListView(View):
             return render(request, 'admin/user/login.html',
                           {'err_msg': '您当前权限不够，请重新登录！', 'next': '/cert/list'})
         pIndex = request.GET.get('cpage')
-
         search_dict = dict()
         # 如果有这个值 就写入到字典中去
         res = Cert.objects.filter().order_by('cert_id')
-
         paginator = Paginator(res, 10)
         try:
             # page对象
@@ -54,6 +45,7 @@ class ListView(View):
 
     def post(self, request):
         pass
+
 
 class AddView(View):
 
@@ -90,12 +82,14 @@ class AddView(View):
         cert_id = request.POST.get('cert_id')
         cert = None
 
-        cert = Cert(cert_name=cert_name, cert_userx=cert_userx, cert_usery=cert_usery, cert_levelx=cert_levelx, cert_levely=cert_levely,
-                    cert_qrcodex=cert_qrcodex, cert_qrcodey=cert_qrcodey, cert_teachx=cert_teachx, cert_teachy=cert_teachy, cert_imgurl=cert_imgurl)
+        cert = Cert(cert_name=cert_name, cert_userx=cert_userx, cert_usery=cert_usery, cert_levelx=cert_levelx,
+                    cert_levely=cert_levely,
+                    cert_qrcodex=cert_qrcodex, cert_qrcodey=cert_qrcodey, cert_teachx=cert_teachx,
+                    cert_teachy=cert_teachy, cert_imgurl=cert_imgurl)
         if cert_id:
             try:
                 cert_old = Cert.objects.get(cert_id=cert_id)
-                cert.cert_id=cert_old.cert_id
+                cert.cert_id = cert_old.cert_id
                 msg = '更新成功'
                 code = 6
             except Exception as ex:

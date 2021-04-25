@@ -1,13 +1,10 @@
 <!DOCTYPE html>
-<!-- saved from url=(0034)http://www.ncccu.org.cn/case1.html -->
 <html>
 <head>
     {% load static %}
     {% load filters %}
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>竞赛详情</title>
-{#    <script src="{% static 'js/jquery.min.js' %}"></script>#}
-{#    <script src="{% static 'js/scrollto.js' %}"></script>#}
     <link rel="stylesheet" type="text/css" href="{% static 'lib/layui/css/layui.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
         <style>
@@ -20,18 +17,15 @@
             margin-left: 6%;
             margin-right: 9.5%;
         }
-
         .c_time_2 li {
             color: #7b838d;
             margin-left: 0;
             margin-right: 4%;
             line-height: 50px;
         }
-
         .c_time_2 li:nth-child(2) {
             margin-right: 2%;
         }
-
         .c_time_2 li:last-child {
             margin-right: 0;
         }
@@ -44,16 +38,11 @@
     <div class="innertop">
         <div class="line">
             <div class="tleft tcolor1"><img src="{% static 'images/stu/bg_detial.jpeg' %}" width="489" height="276">
-                {% comment %}<span><a href="http://www.ncccu.org.cn/case1.html#cs">报名缴费</a></span>{% endcomment %}
             </div>
             <div class="tright">
                 <div class="ititle">赛题：{{ con.con_name }}</div>
                 <div class="ititle2">
                     <br><br><br>
-{#                    <span>组织架构</span><br>#}
-{#                    主办单位：全国高等学校计算机教育研究会<br>#}
-{#                    承办单位：我爱竞赛网、各高校计算机相关院系<br>#}
-{#                    技术支持：兰智大数据、《软件导刊》杂志社#}
                 </div>
                 <div class="ctime">
                     <ul class="c_time_1">
@@ -70,13 +59,8 @@
                 </div>
             </div>
             <div class="clear"></div>
-
         </div>
-
-
     </div>
-
-
     <!--innerbottom-->
     <div class="innerbottom">
         <div class="line">
@@ -100,46 +84,33 @@
                     <li id="cs6" style="background-image: url({% static 'images/bpic1.png' %}); color: rgb(42, 46, 90);">
                         竞赛场地
                     </li>
-{#                    <li id="cs7" style="background-image: url({% static 'images/bpic1.png' %}); color: rgb(42, 46, 90);">#}
-{#                        竞赛级别#}
-{#                    </li>#}
                 </ul>
-
-
             </div>
             <div class="bright">
-
-
                 <a  id="cst1" class="cs1"></a>
                 <span>一、竞赛规则：</span><br>
                 {{ con.con_rule|safe }}
                 <br><br>
-
                 <a id="cst2" class="cs2"></a>
                 <span>二、竞赛时间：</span><br>
                 {{ con.con_time|date:"Y-m-d H:i:s" }}
                 <br><br>
-
                 <a id="cst3" class="cs3"></a>
                 <span>三、报名时间：</span><br>
                 {{ con.con_signtime|date:"Y-m-d H:i:s" }} 至 {{ con.con_endtime|date:"Y-m-d H:i:s" }}
                 <br><br>
-
                 <a id="cst4" class="cs4"></a>
                 <span>四、竞赛语言：</span><br>
                 {{ con.con_lang }}
                 <br><br>
-
                 <a id="cst5" class="cs5"></a>
                 <span>五、竞赛环境：</span><br>
                 {{ con.con_environ }}
                 <br><br>
-
                 <a id="cst6" class="cs6"></a>
                 <span>六、竞赛场地：</span><br>
                 {{ con.con_place }}
                 <br><br>
-
                 <a id="cst7" class="cs7"></a>
                 <span>七、竞赛级别：</span><br>
                {{ con.con_level|level }}
@@ -194,9 +165,7 @@
             <div class="clear"></div>
         </div>
     </div>
-
 </div>
-
 </body>
 <script src="{% static 'lib/layui/layui.js' %}"></script>
 <script>
@@ -220,81 +189,5 @@
             })
 
         });
-    {% comment %}$(document).ready(function () {
-        $(window).scroll(function () {
-            if ($(window).scrollTop() > 0) {
-                $(".innernav").css({"position": "fixed", "top": "0px", "right": "0px", "left": "0px", "z-index": "10"});
-            } else {
-                $(".innernav").css({"position": "relative", "top": "0px"});
-            }
-
-
-            if ($(window).scrollTop() > 380) {
-                $(".bleft").css({"position": "fixed", "top": "70px", "z-index": "10"});
-            } else {
-                $(".bleft").css({"position": "static", "top": "0px"});
-            }
-
-
-            if ($(window).scrollTop()  > $("#cs1").offset().top && $(window).scrollTop() < $("#cs2").offset().top) {
-                $(".bleft li").css({"background-image": "url({% static 'images/bpic1.png' %})", "color": "#2a2e5a"});
-                $("#cs1").css({"background-image": "url({% static 'images/bpic2.png' %})", "color": "#fff"});
-            }
-
-
-            if ($(window).scrollTop() > $("#cs2").offset().top && $(window).scrollTop() < $("#cs3").offset().top) {
-                $(".bleft li").css({"background-image": "url({% static 'images/bpic1.png' %})", "color": "#2a2e5a"});
-                $("#cs2").css({"background-image": "url({% static 'images/bpic2.png' %})", "color": "#fff"});
-            }
-
-
-            if ($(window).scrollTop() > 900 && $(window).scrollTop() < 1100) {
-                $(".bleft li").css({"background-image": "url({% static 'images/bpic1.png' %})", "color": "#2a2e5a"});
-                $("#cs3").css({"background-image": "url({% static 'images/bpic2.png' %})", "color": "#fff"});
-            }
-
-            if ($(window).scrollTop() > 1100 && $(window).scrollTop() < 1300) {
-                $(".bleft li").css({"background-image": "url({% static 'images/bpic1.png' %})", "color": "#2a2e5a"});
-                $("#cs4").css({"background-image": "url({% static 'images/bpic2.png' %})", "color": "#fff"});
-            }
-
-
-        });
-
-
-        $("#cs1").click(function () {
-            $.scrollTo('.cs1', 400);
-        });
-        $("#cs2").click(function () {
-            $.scrollTo('.cs2', 400);
-        });
-        $("#cs3").click(function () {
-            $.scrollTo('.cs3', 400);
-        });
-        $("#cs4").click(function () {
-            $.scrollTo('.cs4', 400);
-        });
-        $("#cs5").click(function () {
-            $.scrollTo('.cs5', 400);
-        });
-        $("#cs6").click(function () {
-            $.scrollTo('.cs6', 400);
-        });
-        $("#cs7").click(function () {
-            $.scrollTo('.cs7', 400);
-        });
-
-        $("#cs8").click(function () {
-            $.scrollTo('.cs8', 400);
-        });
-
-        $("#cs9").click(function () {
-            $.scrollTo('.cs9', 400);
-        });
-
-    });{% endcomment %}
-
-
-
 </script>
 </html>

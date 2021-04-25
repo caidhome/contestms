@@ -14,13 +14,10 @@
         <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
         <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
     </head>
-    
     <body>
     {% csrf_token %}
         <div class="x-nav">
             <span class="layui-breadcrumb">
-{#                <a href="">订单列表</a>#}
-{#                <a href="">演示</a>#}
                 <a>
                     <cite>竞赛列表</cite></a>
             </span>
@@ -59,17 +56,12 @@
                             </form>
                         </div>
                         <div class="layui-card-header">
-                            {% comment %}<button class="layui-btn layui-btn-danger" onclick="delAll()">
-                                <i class="layui-icon"></i>批量删除</button>{% endcomment %}
                             <button class="layui-btn" onclick="xadmin.open('添加竞赛','/contest/add',800,600)">
                                 <i class="layui-icon"></i>添加</button></div>
                         <div class="layui-card-body ">
                             <table class="layui-table layui-form cus_con_table">
                                 <thead>
                                     <tr>
-                                        {% comment %}<th width="4%">
-                                            <input type="checkbox" name="" lay-skin="primary">
-                                        </th>{% endcomment %}
                                         <th width="6%">编号</th>
                                         <th width="12%">名称</th>
                                         <th width="12%">竞赛时间</th>
@@ -87,8 +79,6 @@
                                 <tbody>
                                     {% for con in res %}
                                     <tr>
-                                        {% comment %}<td style="width: 1%;">
-                                            <input type="checkbox" name="con_id" lay-skin="primary"></td>{% endcomment %}
                                         <td>{{ con.con_id }}</td>
                                         <td class="cus_con_td" id="con_name_{{ con.con_id }}">{{ con.con_name }}</td>
                                         <td>{{ con.con_time|date:"Y/m/d H:i:s" }}</td>
@@ -107,8 +97,6 @@
                                                 <i class="layui-icon">&#xe640;</i></a>
                                             <a title="查看" onclick="show_contest('{{ con.con_id }}')" href="javascript:;">
                                                  <i class="layui-icon">&#xe649;</i></a>
-                                            {% comment %}<a title="发通知" onclick="send_notice('{{ con.con_id }}')" href="javascript:;">
-                                                 <i class="layui-icon">&#xe667;</i></a>{% endcomment %}
                                         </td>
                                     </tr>
                                     {%empty%}
@@ -159,17 +147,10 @@
                 elem: '#end' //指定元素
                 ,type: 'datetime'
             });
-
-
         });
-
-
         function show_contest(id) {
             parent.xadmin.add_tab($('#con_name_'+id).text(),'/contest/detial/'+id+'/', true)
-            {#window.top.location.reload()#}
         }
-
-
         /*用户-停用*/
         function member_stop(obj, id) {
             layer.confirm('确认要停用吗？',
@@ -195,11 +176,10 @@
                         time: 1000
                     });
                 }
-
             });
         }
 
-        /*用户-删除*/
+        /*竞赛-删除*/
         function member_del(obj, cid) {
             layer.confirm('确认要删除吗？',
             function(index) {
@@ -219,7 +199,6 @@
 
             });
         }
-
         function delAll(argument) {
 
             var data = tableCheck.getData();
@@ -233,7 +212,6 @@
                 $(".layui-form-checked").not('.header').parents('tr').remove();
             });
         }
-
         function send_notice(cid) {
             layui.$.ajax({
                     url: '/contest/sendnotice/'+cid+'/',
@@ -252,5 +230,4 @@
               });
         }
     </script>
-
 </html>

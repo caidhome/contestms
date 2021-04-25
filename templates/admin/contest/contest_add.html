@@ -10,11 +10,9 @@
         <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
         <link rel="stylesheet" href="{% static 'css/font.css' %}">
         <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
-        <!-- <link rel="stylesheet" href="./css/theme5.css"> -->
         <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
         <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
     </head>
-    
     <body>
         <div class="layui-fluid">
             <div class="layui-row">
@@ -128,7 +126,6 @@
                     ,type: 'post' //默认post
                   }
                 });
-
                 var index= layedit.build('demo');
                 form.render(null, 'component-form-element');
                 form.verify({
@@ -136,7 +133,6 @@
                         layedit.sync(index);
                      }
                  });
-
                 var start_obj = laydate.render({
                     elem: '#start' //指定元素
                     ,type: 'datetime'
@@ -211,8 +207,6 @@
                     });
                     return false;
                 });
-
             });</script>
     </body>
-
 </html>

@@ -142,7 +142,6 @@
                 </div>
             </div>
         </div>
-
     </div>
     <div style="padding: 20px;" class="layui-hide" id="code_div">
         <div class="layui-form-item">
@@ -164,7 +163,6 @@
             myVarate = '/static/images/default_avator.jpg';
         else
             myVarate = '/static{{ stu.stu_avator }}';
-
         layui.use(['form', 'layer', 'upload'],
             function () {
                 var $ = layui.jquery;
@@ -172,7 +170,6 @@
                     layer = layui.layer,
                     upload = layui.upload,
                     demoText = $('#demoText');
-
                 var active = {
                     offset: function (othis) {
                         if($("input[name='stu_pwd']").val() != $("input[name='repass']").val()){
@@ -259,17 +256,12 @@
                                 }
                             }
                         });
-
-
                     }
                 };
-
                 $('#c_btn').on('click', function () {
                     var othis = $(this), method = othis.data('method');
                     active[method] ? active[method].call(this, othis) : '';
                 });
-
-
                 $(function () {
                     if ($("#leftbar_mydasai").hasClass('active'))
                         $("#leftbar_mydasai").removeClass('active')
@@ -277,7 +269,6 @@
                         $("#leftbar_myscores").removeClass('active')
                     $("#leftbar_myaccount").addClass('active')
                 })
-
                 $('#demo1').attr('src', myVarate);//页面初始化的时候渲染图片
                 //普通图片上传
                 var uploadInst = upload.render({
@@ -294,15 +285,8 @@
                     }
                     , acceptMime: 'image/*'
                     ,exts: 'jpg|png|jpeg'
-                    {% comment %}, before: function (obj) {
-                        /*如果您不想用上面的URL 进行上传,也可以在这里,添加你的上传方式*/
-                        obj.preview(function (index, file, result) {
-                            $('#demo1').attr('src', result);//图片链接（base64）
-                        });
-                    }{% endcomment %}
                     ,choose: function(obj){  //上传前选择回调方法
                         var flag = true;
-                        {#console.log(file);            //file表示文件信息，result表示文件src地址#}
                         obj.preview(function(index, file, result){
                             var img = new Image();
                             img.src = result;
@@ -338,7 +322,6 @@
                 $(document).on('click', ".demo-reload", function () {
                     uploadInst.upload();
                 })
-
                 //自定义验证规则
                 form.verify({
                     nikename: function (value) {
@@ -353,39 +336,6 @@
                         }
                     }
                 });
-
-                //监听提交
-                {% comment %}form.on('submit(add)',
-                function(data) {
-                    var data = $('#user_admin_add_form').serialize()
-                    $.ajax({
-                        url: '/user/add/2/',
-                        data: data,
-                        dataType: "json",
-                        type: "POST",
-                        success: function (result) {
-                            if (result.code === 6) {
-                            layer.alert(result.msg, {
-                                    icon: result.code
-                                },
-                                function() {
-                                    parent.location.reload(true);
-                                    // 获得frame索引
-                                    var index = parent.layer.getFrameIndex(window.name);
-                                    console.log(index)
-                                    //关闭当前frame
-                                    parent.layer.close(index);
-                                });
-                            } else {
-                                layer.alert(result.msg, {
-                                    icon: result.code
-                                });
-                            }
-                        }
-                    });
-                    return false;
-                });
-    {% endcomment %}
             });
     </script>
 {% endblock %}

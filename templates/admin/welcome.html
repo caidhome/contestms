@@ -1,174 +1,113 @@
 <!DOCTYPE html>
 <html class="x-admin-sm">
-    <head>
-        {% load static %}
-        <meta charset="UTF-8">
-        <title>天梯赛管理系统-欢迎页面</title>
-        <meta name="renderer" content="webkit">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
-        <link rel="stylesheet" href="{% static 'css/font.css' %}">
-        <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
-        <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
-        <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
-    </head>
-    <body>
-        <div class="layui-fluid">
-            <div class="layui-row layui-col-space15">
-                <div class="layui-col-md12">
-                    <div class="layui-card">
-                        <div class="layui-card-body ">
-                            <blockquote class="layui-elem-quote">欢迎管理员：<font color="green">{{ request.session.login_user.admin_name }}</font>
-                                <span class="x-red">{{ request.session.admin_name }}</span> 当前时间:{% now "Y-m-d" %}
-                            </blockquote>
-                        </div>
-                    </div>
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>天梯赛管理系统-欢迎页面</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="{% static 'css/font.css' %}">
+    <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
+    <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <blockquote class="layui-elem-quote">欢迎管理员：<font
+                            color="green">{{ request.session.login_user.admin_name }}</font>
+                        <span class="x-red">{{ request.session.admin_name }}</span> 当前时间:{% now "Y-m-d" %}
+                    </blockquote>
                 </div>
-                <div class="layui-col-md12">
-                    <div class="layui-card">
-                        <div class="layui-card-header">数据统计</div>
-                        <div class="layui-card-body ">
-                            <ul class="layui-row layui-col-space10 layui-this x-admin-carousel x-admin-backlog">
-                                <li class="layui-col-md2 layui-col-xs6">
-                                    <a href="javascript:;" class="x-admin-backlog-body">
-                                        <h3>竞赛数</h3>
-                                        <p>
-                                            <cite>{{ contest_num }}</cite></p>
-                                    </a>
-                                </li>
-                                <li class="layui-col-md2 layui-col-xs6">
-                                    <a href="javascript:;" class="x-admin-backlog-body">
-                                        <h3>证书数</h3>
-                                        <p>
-                                            <cite>{{ cert_num }}</cite></p>
-                                    </a>
-                                </li>
-                                <li class="layui-col-md2 layui-col-xs6">
-                                    <a href="javascript:;" class="x-admin-backlog-body">
-                                        <h3>管理员数</h3>
-                                        <p>
-                                            <cite>{{ admin_num }}</cite></p>
-                                    </a>
-                                </li>
-                                <li class="layui-col-md2 layui-col-xs6">
-                                    <a href="javascript:;" class="x-admin-backlog-body">
-                                        <h3>学生数</h3>
-                                        <p>
-                                            <cite>{{ stu_num }}</cite></p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                {% comment %}<div class="layui-col-sm6 layui-col-md3">
-                    <div class="layui-card">
-                        <div class="layui-card-header">下载
-                            <span class="layui-badge layui-bg-cyan layuiadmin-badge">月</span></div>
-                        <div class="layui-card-body  ">
-                            <p class="layuiadmin-big-font">33,555</p>
-                            <p>新下载
-                                <span class="layuiadmin-span-color">10%
-                                    <i class="layui-inline layui-icon layui-icon-face-smile-b"></i></span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="layui-col-sm6 layui-col-md3">
-                    <div class="layui-card">
-                        <div class="layui-card-header">下载
-                            <span class="layui-badge layui-bg-cyan layuiadmin-badge">月</span></div>
-                        <div class="layui-card-body ">
-                            <p class="layuiadmin-big-font">33,555</p>
-                            <p>新下载
-                                <span class="layuiadmin-span-color">10%
-                                    <i class="layui-inline layui-icon layui-icon-face-smile-b"></i></span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="layui-col-sm6 layui-col-md3">
-                    <div class="layui-card">
-                        <div class="layui-card-header">下载
-                            <span class="layui-badge layui-bg-cyan layuiadmin-badge">月</span></div>
-                        <div class="layui-card-body ">
-                            <p class="layuiadmin-big-font">33,555</p>
-                            <p>新下载
-                                <span class="layuiadmin-span-color">10%
-                                    <i class="layui-inline layui-icon layui-icon-face-smile-b"></i></span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="layui-col-sm6 layui-col-md3">
-                    <div class="layui-card">
-                        <div class="layui-card-header">下载
-                            <span class="layui-badge layui-bg-cyan layuiadmin-badge">月</span></div>
-                        <div class="layui-card-body ">
-                            <p class="layuiadmin-big-font">33,555</p>
-                            <p>新下载
-                                <span class="layuiadmin-span-color">10%
-                                    <i class="layui-inline layui-icon layui-icon-face-smile-b"></i></span>
-                            </p>
-                        </div>
-                    </div>
-                </div>{% endcomment %}
-                <div class="layui-col-md12">
-                    <div class="layui-card">
-                        <div class="layui-card-header">系统信息</div>
-                        <div class="layui-card-body ">
-                            <table class="layui-table">
-                                <tbody>
-                                    <tr>
-                                        <th>版本</th>
-                                        <td>0.1.3</td></tr>
-                                    <tr>
-                                        <th>服务器地址</th>
-                                        <td>81.69.38.227</td></tr>
-                                    <tr>
-                                        <th>操作系统</th>
-                                        <td>centos7</td></tr>
-                                    <tr>
-                                        <th>运行环境</th>
-                                        <td>Nginx/1.18.0</td></tr>
-                                    <tr>
-                                        <th>PHP版本</th>
-                                        <td>7.2.10</td></tr>
-                                    <tr>
-                                        <th>MYSQL版本</th>
-                                        <td>5.7</td></tr>
-                                    <tr>
-                                        <th>上传附件限制</th>
-                                        <td>2M</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% comment %}<div class="layui-col-md12">
-                    <div class="layui-card">
-                        <div class="layui-card-header">开发团队</div>
-                        <div class="layui-card-body ">
-                            <table class="layui-table">
-                                <tbody>
-                                    <tr>
-                                        <th>版权所有</th>
-                                        <td>xuebingsi(xuebingsi)
-                                            <a href="http://x.xuebingsi.com/" target="_blank">访问官网</a></td>
-                                    </tr>
-                                    <tr>
-                                        <th>开发者</th>
-                                        <td>马志斌(113664000@qq.com)</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>{% endcomment %}
-                <style id="welcome_style"></style>
-                <div class="layui-col-md12">
-                    <blockquote class="layui-elem-quote layui-quote-nm">本系统前端使用layui技术,后端使用Django技术</blockquote></div>
             </div>
         </div>
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">数据统计</div>
+                <div class="layui-card-body ">
+                    <ul class="layui-row layui-col-space10 layui-this x-admin-carousel x-admin-backlog">
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>竞赛数</h3>
+                                <p>
+                                    <cite>{{ contest_num }}</cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>证书数</h3>
+                                <p>
+                                    <cite>{{ cert_num }}</cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>管理员数</h3>
+                                <p>
+                                    <cite>{{ admin_num }}</cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>学生数</h3>
+                                <p>
+                                    <cite>{{ stu_num }}</cite></p>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    </body>
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">系统信息</div>
+                <div class="layui-card-body ">
+                    <table class="layui-table">
+                        <tbody>
+                        <tr>
+                            <th>版本</th>
+                            <td>0.1.3</td>
+                        </tr>
+                        <tr>
+                            <th>服务器地址</th>
+                            <td>81.69.38.227</td>
+                        </tr>
+                        <tr>
+                            <th>操作系统</th>
+                            <td>centos7</td>
+                        </tr>
+                        <tr>
+                            <th>运行环境</th>
+                            <td>Nginx/1.18.0</td>
+                        </tr>
+                        <tr>
+                            <th>PHP版本</th>
+                            <td>7.2.10</td>
+                        </tr>
+                        <tr>
+                            <th>MYSQL版本</th>
+                            <td>5.7</td>
+                        </tr>
+                        <tr>
+                            <th>上传附件限制</th>
+                            <td>2M</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <style id="welcome_style"></style>
+        <div class="layui-col-md12">
+            <blockquote class="layui-elem-quote layui-quote-nm">本系统前端使用layui技术,后端使用Django技术</blockquote>
+        </div>
+    </div>
+</div>
+</div>
+</body>
 </html>

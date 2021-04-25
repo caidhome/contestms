@@ -1,7 +1,6 @@
 from django.db import models
 from certms.models import Cert
 from userms.models import Admin, Student
-# Create your models here.
 class Contest(models.Model):
     con_id = models.AutoField(primary_key=True)
     con_name = models.CharField(max_length=255)

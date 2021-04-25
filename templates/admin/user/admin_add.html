@@ -1,186 +1,177 @@
 <!DOCTYPE html>
 <html class="x-admin-sm">
-    {% load static %}
-    <head>
-        <meta charset="UTF-8">
-        <title>管理员添加-天梯赛后台管理系统</title>
-        <meta name="renderer" content="webkit">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
-        <link rel="stylesheet" href="{% static 'css/font.css' %}">
-        <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
-        <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
-        <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
-    </head>
-    <body>
-        <div class="layui-fluid">
-            <div class="layui-row">
-                <form class="layui-form" method="post" enctype="multipart/form-data" id="user_admin_add_form">
-                    {% csrf_token %}
-                  <div class="layui-form-item">
-                      <label for="username" class="layui-form-label">
-                          <span class="x-red">*</span>姓名
-                      </label>
-                      <div class="layui-input-inline">
-                          <input type="text" id="username" name="admin_name" required="" lay-verify="required" value="{{ user.admin_name }}"
-                          autocomplete="off" class="layui-input">
-                      </div>
-                      <div class="layui-form-mid layui-word-aux">
-                          <span class="x-red">*</span>{% comment %}将会成为您唯一的登入名{% endcomment %}
-                      </div>
-                  </div>
-                  <div class="layui-form-item">
-                      <label for="phone" class="layui-form-label">
-                          <span class="x-red">*</span>账号
-                      </label>
-                      <div class="layui-input-inline">
-                          <input type="text" id="phone" name="admin_account" required="" lay-verify="required" value="{{ user.admin_account }}"
-                          autocomplete="off" class="layui-input">
-                      </div>
-                      <div class="layui-form-mid layui-word-aux">
-                          <span class="x-red">*</span>{% comment %}将会成为您唯一的登入名{% endcomment %}
-                      </div>
-                  </div>
-                  {% comment %}<div class="layui-form-item">
-                      <label for="L_email" class="layui-form-label">
-                          <span class="x-red">*</span>邮箱
-                      </label>
-                      <div class="layui-input-inline">
-                          <input type="text" id="L_email" name="email" required="" lay-verify="email"
-                          autocomplete="off" class="layui-input">
-                      </div>
-                      <div class="layui-form-mid layui-word-aux">
-                          <span class="x-red">*</span>
-                      </div>
-                  </div>{% endcomment %}
-                  <div class="layui-form-item">
-                      <label class="layui-form-label"><span class="x-red">*</span>角色</label>
-                      <div class="layui-input-block">
-                        <input type="radio" name="admin_role" lay-skin="primary" title="超级管理员" value="1" {% if not user.admin_role or user.admin_role is 1 %}checked{% endif %}>
-                        <input type="radio" name="admin_role" lay-skin="primary" title="普通管理员" value="2" {% if user.admin_role is 2 %}checked{% endif %}>
-{#                        <input type="radio" name="role" lay-skin="primary" title="学生" value="1">#}
-                      </div>
-                  </div>
-                  {% if not user.admin_id %}
-                  <div class="layui-form-item">
-                      <label for="L_pass" class="layui-form-label">
-                          <span class="x-red">*</span>密码
-                      </label>
-                      <div class="layui-input-inline">
-                          <input type="password" id="L_pass" name="admin_pwd" required="" lay-verify="pass"
-                          autocomplete="off" class="layui-input">
-                      </div>
-                      <div class="layui-form-mid layui-word-aux">
-                          6到16个字符
-                      </div>
-                  </div>
-                  <div class="layui-form-item">
-                      <label for="L_repass" class="layui-form-label">
-                          <span class="x-red">*</span>确认密码
-                      </label>
-                      <div class="layui-input-inline">
-                          <input type="password" id="L_repass" name="repass" required="" lay-verify="repass"
-                          autocomplete="off" class="layui-input">
-                      </div>
-                  </div>
-                {% endif %}
-                  <div class="layui-form-item">
-                    <label class="layui-form-label">上传头像</label>
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>管理员添加-天梯赛后台管理系统</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="{% static 'css/font.css' %}">
+    <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
+    <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form" method="post" enctype="multipart/form-data" id="user_admin_add_form">
+            {% csrf_token %}
+            <div class="layui-form-item">
+                <label for="username" class="layui-form-label">
+                    <span class="x-red">*</span>姓名
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="username" name="admin_name" required="" lay-verify="required"
+                           value="{{ user.admin_name }}"
+                           autocomplete="off" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    <span class="x-red">*</span>{% comment %}将会成为您唯一的登入名{% endcomment %}
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="phone" class="layui-form-label">
+                    <span class="x-red">*</span>账号
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="phone" name="admin_account" required="" lay-verify="required"
+                           value="{{ user.admin_account }}"
+                           autocomplete="off" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    <span class="x-red">*</span>{% comment %}将会成为您唯一的登入名{% endcomment %}
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="x-red">*</span>角色</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="admin_role" lay-skin="primary" title="超级管理员" value="1"
+                           {% if not user.admin_role or user.admin_role is 1 %}checked{% endif %}>
+                    <input type="radio" name="admin_role" lay-skin="primary" title="普通管理员" value="2"
+                           {% if user.admin_role is 2 %}checked{% endif %}>
+                </div>
+            </div>
+            {% if not user.admin_id %}
+                <div class="layui-form-item">
+                    <label for="L_pass" class="layui-form-label">
+                        <span class="x-red">*</span>密码
+                    </label>
                     <div class="layui-input-inline">
-                        <div class="layui-upload">
-                            <input type="hidden" name="admin_avator" value="/upload/user/avator/student/default_avator.jpg" id="logo">
-                            <div class="layui-upload-list">
-                                <img class="layui-upload-img" id="demo1" width="80px" height="80px">
-                                <p id="demoText"></p>
-                            </div>
+                        <input type="password" id="L_pass" name="admin_pwd" required="" lay-verify="pass"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        6到16个字符
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="L_repass" class="layui-form-label">
+                        <span class="x-red">*</span>确认密码
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="password" id="L_repass" name="repass" required="" lay-verify="repass"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            {% endif %}
+            <div class="layui-form-item">
+                <label class="layui-form-label">上传头像</label>
+                <div class="layui-input-inline">
+                    <div class="layui-upload">
+                        <input type="hidden" name="admin_avator" value="/upload/user/avator/student/default_avator.jpg"
+                               id="logo">
+                        <div class="layui-upload-list">
+                            <img class="layui-upload-img" id="demo1" width="80px" height="80px">
+                            <p id="demoText"></p>
                         </div>
                     </div>
                 </div>
-                  <div class="layui-form-item">
-                      <label for="L_repass" class="layui-form-label">
-                      </label>
-                      <button  class="layui-btn" lay-filter="add" lay-submit="">
-                          {% if not user.admin_id %}增加{% else %}更新{% endif %}
-                      </button>
-                  </div>
-                    <input type="hidden" name="admin_id" value="{{ user.admin_id }}">
-              </form>
             </div>
-        </div>
-        <script>
-           var myVarate, admin_avat;
-            if('{{ user.admin_id }}' == '' || '{{ user.admin_avator }}' == 'None' || '{{ user.admin_avator }}' == ''){
-                myVarate = '/static/upload/user/avator/admin/default_avator.jpg';
-                admin_avat = '/upload/user/avator/admin/default_avator.jpg'
-            }else{
-                myVarate = '/static{{ user.admin_avator }}';
-                admin_avat = '{{ user.admin_avator }}'
-            }
-
-            layui.use(['form', 'layer', 'upload'],
-            function() {
-                var $ = layui.jquery;
-                var form = layui.form,
+            <div class="layui-form-item">
+                <label for="L_repass" class="layui-form-label">
+                </label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">
+                    {% if not user.admin_id %}增加{% else %}更新{% endif %}
+                </button>
+            </div>
+            <input type="hidden" name="admin_id" value="{{ user.admin_id }}">
+        </form>
+    </div>
+</div>
+<script>
+    var myVarate, admin_avat;
+    if ('{{ user.admin_id }}' == '' || '{{ user.admin_avator }}' == 'None' || '{{ user.admin_avator }}' == '') {
+        myVarate = '/static/upload/user/avator/admin/default_avator.jpg';
+        admin_avat = '/upload/user/avator/admin/default_avator.jpg'
+    } else {
+        myVarate = '/static{{ user.admin_avator }}';
+        admin_avat = '{{ user.admin_avator }}'
+    }
+    layui.use(['form', 'layer', 'upload'],
+        function () {
+            var $ = layui.jquery;
+            var form = layui.form,
                 layer = layui.layer,
                 upload = layui.upload,
-                 demoText = $('#demoText');
-                $('#demo1').attr('src', myVarate);//页面初始化的时候渲染图片
-                $("#logo").val(admin_avat)
-                //普通图片上传
-                var uploadInst = upload.render({
-                    elem: '#demo1',
-                    url: '/user/upload',//这里填写你的上传地址
-                    accept: 'images',
-                    method: 'post',
-                    data: {
-                        'csrfmiddlewaretoken': function () {
-                            return $(':input:first').val()
-                        },
-                        'fpath': '/user/avator/admin'
-                    }
-                    , acceptMime: 'image/*'
-                    , before: function (obj) {
-                        /*如果您不想用上面的URL 进行上传,也可以在这里,添加你的上传方式*/
-                        obj.preview(function (index, file, result) {
-                            $('#demo1').attr('src', result);//图片链接（base64）
-                        });
-                    }, done: function (res) {
-                        if (res.code == 6) {//长传成功(具体返回code 看后台是怎么处理的)
-                            $('#logo').val(res.url)
-                            $('#demo1').attr('src', '/static' + res.url);
-                            demoText.html('')
-                        } else {
-                            demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
-                        }
-                        layer.msg(res.msg);
-                    }
-                    , error: function () {
+                demoText = $('#demoText');
+            $('#demo1').attr('src', myVarate);//页面初始化的时候渲染图片
+            $("#logo").val(admin_avat)
+            //普通图片上传
+            var uploadInst = upload.render({
+                elem: '#demo1',
+                url: '/user/upload',//这里填写你的上传地址
+                accept: 'images',
+                method: 'post',
+                data: {
+                    'csrfmiddlewaretoken': function () {
+                        return $(':input:first').val()
+                    },
+                    'fpath': '/user/avator/admin'
+                }
+                , acceptMime: 'image/*'
+                , before: function (obj) {
+                    /*如果您不想用上面的URL 进行上传,也可以在这里,添加你的上传方式*/
+                    obj.preview(function (index, file, result) {
+                        $('#demo1').attr('src', result);//图片链接（base64）
+                    });
+                }, done: function (res) {
+                    if (res.code == 6) {//长传成功(具体返回code 看后台是怎么处理的)
+                        $('#logo').val(res.url)
+                        $('#demo1').attr('src', '/static' + res.url);
+                        demoText.html('')
+                    } else {
                         demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
                     }
-                });
-                //上传失败监听重试按钮的操作
-                demoText.find('.demo-reload').on('click', function () {
-                    uploadInst.upload();
-                });
-
-                //自定义验证规则
-                form.verify({
-                    nikename: function(value) {
-                        if (value.length < 5) {
-                            return '昵称至少得5个字符啊';
-                        }
-                    },
-                    pass: [/(.+){6,12}$/, '密码必须6到12位'],
-                    repass: function(value) {
-                        if ($('#L_pass').val() != $('#L_repass').val()) {
-                            return '两次密码不一致';
-                        }
+                    layer.msg(res.msg);
+                }
+                , error: function () {
+                    demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                }
+            });
+            //上传失败监听重试按钮的操作
+            demoText.find('.demo-reload').on('click', function () {
+                uploadInst.upload();
+            });
+            //自定义验证规则
+            form.verify({
+                nikename: function (value) {
+                    if (value.length < 5) {
+                        return '昵称至少得5个字符啊';
                     }
-                });
+                },
+                pass: [/(.+){6,12}$/, '密码必须6到12位'],
+                repass: function (value) {
+                    if ($('#L_pass').val() != $('#L_repass').val()) {
+                        return '两次密码不一致';
+                    }
+                }
+            });
 
-                //监听提交
-                form.on('submit(add)',
-                function(data) {
+            //监听提交
+            form.on('submit(add)',
+                function (data) {
                     var data = $('#user_admin_add_form').serialize()
                     $.ajax({
                         url: '/user/add/1/',
@@ -189,17 +180,17 @@
                         type: "POST",
                         success: function (result) {
                             if (result.code === 6) {
-                            layer.alert(result.msg, {
-                                    icon: result.code
-                                },
-                                function() {
-                                    parent.location.reload(true);
-                                    // 获得frame索引
-                                    var index = parent.layer.getFrameIndex(window.name);
-                                    console.log(index)
-                                    //关闭当前frame
-                                    parent.layer.close(index);
-                                });
+                                layer.alert(result.msg, {
+                                        icon: result.code
+                                    },
+                                    function () {
+                                        parent.location.reload(true);
+                                        // 获得frame索引
+                                        var index = parent.layer.getFrameIndex(window.name);
+                                        console.log(index)
+                                        //关闭当前frame
+                                        parent.layer.close(index);
+                                    });
                             } else {
                                 layer.alert(result.msg, {
                                     icon: result.code
@@ -209,9 +200,6 @@
                     });
                     return false;
                 });
-
-            });</script>
-
-    </body>
-
+        });</script>
+</body>
 </html>

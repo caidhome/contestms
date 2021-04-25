@@ -1,147 +1,110 @@
 <!DOCTYPE html>
 <html class="x-admin-sm">
-    {% load filters %}
-    <head>
-        {% load static %}
-        <meta charset="UTF-8">
-        <title>添加分组-天梯赛后台管理系统</title>
-        <meta name="renderer" content="webkit">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
-        <link rel="stylesheet" href="{% static 'css/font.css' %}">
-        <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
-        <!-- <link rel="stylesheet" href="./css/theme5.css"> -->
-        <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
-        <script src="{% static 'lib/layui/lay/modules/transfer.js' %}" charset="utf-8"></script>
-        <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
-    </head>
-    
-    <body>
-        <div class="layui-fluid">
-            <div class="layui-row">
-                {% csrf_token %}
-                    <div class="layui-form-item">
-                        <label for="username" class="layui-form-label">
-                            分组名称</label>
-                        <label for="username" class="layui-form-label" style="font-size: 16px;">
-                            {{ group.group_name }}</label>
-                    </div>
+{% load filters %}
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>添加分组-天梯赛后台管理系统</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="{% static 'css/font.css' %}">
+    <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
+    <!-- <link rel="stylesheet" href="./css/theme5.css"> -->
+    <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script src="{% static 'lib/layui/lay/modules/transfer.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        {% csrf_token %}
+        <div class="layui-form-item">
+            <label for="username" class="layui-form-label">
+                分组名称</label>
+            <label for="username" class="layui-form-label" style="font-size: 16px;">
+                {{ group.group_name }}</label>
+        </div>
 
-                    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
-                      <legend   >初始右侧数据集合</legend>
-                    </fieldset>
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+            <legend>初始右侧数据集合</legend>
+        </fieldset>
 
-                    <div id="test3" class="demo-transfer"></div>
+        <div id="test3" class="demo-transfer"></div>
 
-                    <div class="layui-form-item">
-                        <label for="L_repass" class="layui-form-label"></label>
-                        <button type="button" class="layui-btn" lay-demotransferactive="closeWin">完成</button>
-                    </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label"></label>
+            <button type="button" class="layui-btn" lay-demotransferactive="closeWin">完成</button>
+        </div>
 
-                <input type="hidden" name="group_id" value="{{ group.group_id }}">
-                    <script>
+        <input type="hidden" name="group_id" value="{{ group.group_id }}">
+        <script>
+            layui.use(['transfer', 'form', 'layer', 'util'],
+                function () {
+                    var form = layui.form,
+                        $ = layui.$
+                        , transfer = layui.transfer
+                        , layer = layui.layer
+                        , util = layui.util;
 
-                        layui.use(['transfer', 'form', 'layer', 'util'],
-                            function() {
-                                var form = layui.form,
-                                    $ = layui.$
-                                    ,transfer = layui.transfer
-                                    ,layer = layui.layer
-                                    ,util = layui.util;
-
-                                var grouplist = new Array();
-                                var ungroup = new Array();
-                                var stu_all = new Array();
-                                {% comment %}{% for key,value in stu_dict.items %}
-                                    {% for stu1 in value %}
-                                            grouped.push({'value': '{{ stu1.stu_id }}', 'title': '{{ stu1.stu_name }}'})
-                                        {% endfor %}
-                                    {% ifequal key 'grouped' %}
-                                        {% for stu1 in value %}
-                                            grouped.push({'value': '{{ stu1.stu_id }}', 'title': '{{ stu1.stu_name }}'})
-                                        {% endfor %}
-                                        {% else %}
-                                        {% for stu2 in value %}
-                                            ungroup.push({'value': '{{ stu2.stu_id }}', 'title': '{{ stu2.stu_name }}'})
-                                        {% endfor %}
-                                    {% endifequal %}
-                                {% endfor %}
-                                {% endcomment %}
-                                {% for stu in stu_list %}
-                                    stu_all.push({'value': {{ stu.stu_id }}, 'title': '{{ stu.stu_name }}'})
-                                {% endfor %}
-                                {% for stued in grouped %}
-                                    grouplist.push({{ stued }})
-                                {% endfor %}
-
-                                //初始右侧数据
-                                transfer.render({
-                                    elem: '#test3'
-                                    ,title: ['未分组', '{{ group.group_name }}']
-                                    ,data: stu_all
-                                    ,value: {{ grouped }}
-                                    ,showSearch: true
-                                    ,onchange: function(obj, index){
-                                      var arr = ['add', 'del'];
-                                      data_dict = {'csrfmiddlewaretoken': $("input[name='csrfmiddlewaretoken']").val(), 'gid': {{ group.group_id }}}
-                                      var ids = new Array()
-                                      for(i=0; i < obj.length; i++){
-                                          ids.push(obj[i].value+'')
-                                      }
-                                      data_dict[arr[index]] = ids
-                                      {#alert(JSON.stringify(ids))#}
-                                     $.ajax({
-                                            url: '/contest/group/part',
-                                            data: data_dict,
-                                            traditional:true,
-                                            dataType: "json",
-                                            type: "POST",
-                                            success: function (result) {
-                                                if (result.code === 6) {
-                                                    layer.msg(result.msg, {
-                                                        icon: result.code
-                                                    })
-                                                }
-                                                {% comment %}if (result.code === 6) {
-                                                    layer.alert(result.msg, {
-                                                            icon: result.code
-                                                        },
-                                                        function() {
-                                                            parent.location.reload(true);
-                                                            // 获得frame索引
-                                                            var index = parent.layer.getFrameIndex(window.name);
-                                                            console.log(index)
-                                                            //关闭当前frame
-                                                            parent.layer.close(index);
-                                                        });
-                                                } else {
-                                                    layer.alert(result.msg, {
-                                                        icon: result.code
-                                                    });
-                                                }{% endcomment %}
-                                            }
-                                        });
-
+                    var grouplist = new Array();
+                    var ungroup = new Array();
+                    var stu_all = new Array();
+                    {% for stu in stu_list %}
+                        stu_all.push({'value': {{ stu.stu_id }}, 'title': '{{ stu.stu_name }}'})
+                    {% endfor %}
+                    {% for stued in grouped %}
+                        grouplist.push({{ stued }})
+                    {% endfor %}
+                    //初始右侧数据
+                    transfer.render({
+                        elem: '#test3'
+                        , title: ['未分组', '{{ group.group_name }}']
+                        , data: stu_all
+                        , value: {{ grouped }}
+                        , showSearch: true
+                        , onchange: function (obj, index) {
+                            var arr = ['add', 'del'];
+                            data_dict = {
+                                'csrfmiddlewaretoken': $("input[name='csrfmiddlewaretoken']").val(),
+                                'gid': {{ group.group_id }}
+                            }
+                            var ids = new Array()
+                            for (i = 0; i < obj.length; i++) {
+                                ids.push(obj[i].value + '')
+                            }
+                            data_dict[arr[index]] = ids
+                            $.ajax({
+                                url: '/contest/group/part',
+                                data: data_dict,
+                                traditional: true,
+                                dataType: "json",
+                                type: "POST",
+                                success: function (result) {
+                                    if (result.code === 6) {
+                                        layer.msg(result.msg, {
+                                            icon: result.code
+                                        })
                                     }
-                                })
-
-                            util.event('lay-demoTransferActive', {
-                                closeWin: function(othis){
-                                    parent.location.reload(true);
-                                    // 获得frame索引
-                                    var index = parent.layer.getFrameIndex(window.name);
-                                    console.log(index)
-                                    //关闭当前frame
-                                    parent.layer.close(index);
                                 }
-                              });
-
                             });
 
-
-                    </script>
-            </div>
-        </div>
-    </body>
-
+                        }
+                    })
+                    util.event('lay-demoTransferActive', {
+                        closeWin: function (othis) {
+                            parent.location.reload(true);
+                            // 获得frame索引
+                            var index = parent.layer.getFrameIndex(window.name);
+                            console.log(index)
+                            //关闭当前frame
+                            parent.layer.close(index);
+                        }
+                    });
+                });
+        </script>
+    </div>
+</div>
+</body>
 </html>

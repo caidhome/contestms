@@ -11,11 +11,9 @@
           content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
     <link rel="stylesheet" href="{% static 'css/font.css' %}">
     <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
-    <!-- <link rel="stylesheet" href="./css/theme5.css"> -->
     <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
     <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
 </head>
-
 <body>
 <div class="layui-fluid">
     <div class="layui-row">
@@ -121,7 +119,6 @@
         </div>
     </form>
     </div>
-
 </div>
 <script>
     var cur_input = '';
@@ -138,7 +135,6 @@
             myVarate = '/static{{ cert.cert_imgurl }}';
         else
             myVarate = '/static/images/default_cert.jpeg';
-
 
         $('#reback_img').attr('src', myVarate);//页面初始化的时候渲染图片
         //普通图片上传
@@ -229,7 +225,6 @@
             cur_input=$(this).attr('name')
             cur_input = cur_input.substring(0,cur_input.length-1)
         });
-
         $('#reback_img').click(function(e){
             //获取鼠标在图片上的坐标
             $("input[name="+cur_input+"x]").val(e.offsetX)
@@ -237,9 +232,6 @@
         });
 
     });
-
-
-
 </script>
 </body>
 

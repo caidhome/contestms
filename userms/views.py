@@ -3,7 +3,6 @@ import os
 import re
 
 import xlrd
-from django.core import serializers
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect, HttpResponse
@@ -12,18 +11,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.http import HttpResponseRedirect
 from django_redis import get_redis_connection
-
 from TiantiMS import settings
 from certms.models import Cert
-from userms import models
 from userms.models import Admin, Student
 from contestms.models import Contest, Sign
 from django.http import JsonResponse
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from random import randint
-import hashlib
 
-# Create your views here.
 class Admin_LoginView(View):
 
     def get(self, request):
@@ -47,7 +42,6 @@ class Admin_LoginView(View):
             return HttpResponseRedirect('/admin/index')
         return render(request, 'admin/user/login.html', {'err_msg': '账号或密码错误！'})
 
-# Create your views here.
 class Stu_LoginView(View):
 
     def get(self, request):
@@ -66,7 +60,6 @@ class Stu_LoginView(View):
                    'stu_avator': stu.stu_avator, 'stu_sex': stu.stu_sex, 'stu_card': stu.stu_card, 'stu_motto': stu.stu_motto}
             request.session['is_login'] = 3  # 这个session是用于后面访问每个页面（即调用每个视图函数时要用到，即判断是否已经登录，用此判断）
             request.session['login_user'] = stu
-            # print(next)
             if next and next != 'None':
                 return HttpResponseRedirect(next)
             return HttpResponseRedirect('/')
@@ -77,8 +70,6 @@ class Stu_IndexView(View):
     def get(self, request):
         login_user = None
         is_login = request.session.get('is_login')
-        # if not is_login or is_login != 3:
-        #     return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
         login_user_sess = request.session.get('login_user')
         if login_user_sess and is_login == 3:
             login_id = login_user_sess['stu_id']
@@ -87,7 +78,6 @@ class Stu_IndexView(View):
             except Exception as ex:
                 print('查询异常')
                 print(ex)
-                # return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
         pIndex = request.GET.get('cpage')
         res = Contest.objects.filter().order_by('con_time')
         paginator = Paginator(res, 8)
@@ -111,7 +101,6 @@ class Stu_IndexView(View):
             'login_user': login_user
         }
         return render(request, 'student/index.html', rep_data)
-        # return render(request, 'student/login.html', {'err_msg': '您当前还未登录，请先登录！', 'next': '/'})
 
     def post(self, request):
         pass
@@ -221,12 +210,6 @@ class ListView(View):
             'res': list_page,
             'tpage': len(totol_page),
             'cpage': pIndex
-            # 'filt': {
-            #     'con_level': con_level,
-            #     'con_id': con_id,
-            #     'start': start,
-            #     'end': end
-            # }
         }
         return render(request, target, rep_data)
 
@@ -341,7 +324,6 @@ class AddView(View):
             res_data = {"code": 6, "msg": msg}
         return JsonResponse(res_data)
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class UploadAvatorView(View):
 
@@ -455,9 +437,6 @@ class Admin_PersonView(View):
 class Stu_Query_PersonView(View):
 
     def get(self, request):
-        # is_login = request.session.get('is_login')
-        # if not is_login or is_login not in [1, 2]:
-        #     return JsonResponse({'code': 2, 'msg': '您当前权限不够，请重新登录！', 'stu':''})
         user_id = request.GET.get('user_id')
         try:
             stu = Student.objects.get(stu_no=user_id)
@@ -577,10 +556,6 @@ def page_not_found(request, exception):  # 注意点 ①
 def page_error(request):
     return render(request, '500.html')
 
-
-
-
-
 class StuUpdateInfo(View):
     def post(self, request):
         # try:
@@ -641,7 +616,6 @@ class StuUpdateInfo(View):
         # except Exception as ex:
         #     print(ex)
         #     return JsonResponse({'code': 2, 'msg': '网络有些问题，请等一下再试'})
-
 
 # post请求
 # 获取到验证码，并存入redis
@@ -807,7 +781,6 @@ class UploadStuView(View):
         }
         return JsonResponse(response_data)
 
-
 class CheckStunoView(View):
 
     def get(self, request):
@@ -822,8 +795,6 @@ class CheckStunoView(View):
             print(ex)
             return JsonResponse({"code": 2, "msg": '查询异常！'})
         return JsonResponse({"code": 6, "msg": '学号合法！'})
-
-
 
     def post(self, request):
         pass

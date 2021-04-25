@@ -11,7 +11,6 @@
     <style>
         body{
             background: #333;
-            {#overflow-y: hidden;#}
         }
     </style>
 </head>
@@ -152,18 +151,11 @@
                   var sex = $("input[name='stu_sex']").val()
                   var motto = $("input[name='stu_motto']").val()
                   var card = $("input[name='stu_card']").val()
-
                   if(sno.length <= 0 || pwd.length <= 0 || repwd.length <= 0|| tel.length <= 0|| email.length <= 0||
                       major.length <= 0|| depart.length <= 0|| motto.length <= 0|| card.length <= 0){
                       layui.layer.alert('您还未输入完整信息！', {icon: 2})
                       return false;
                   }
-                  /*
-                  (?!^\d+$) 排除bai全数字
-                    (?!^[a-zA-Z]+$) 排除全字母
-                    [0-9a-zA-Z]{4,23} 字符或字母4-23位，不考虑全为数字和全为字符情况。
-                  * */
-                  {#var reg_no = /(?!^\d+$)(?!^[a-zA-Z]+$)[0-9a-zA-Z]{4,23}/#}
                   var reg_no = /[0-9a-zA-Z]{4,23}/
                   if(!reg_no.test(sno)){
                       layui.layer.alert('学号格式错误！', {icon: 2})
@@ -191,7 +183,6 @@
                   $("#stu_log_form").submit()
               })
         });
-
     </script>
 </body>
 </html>

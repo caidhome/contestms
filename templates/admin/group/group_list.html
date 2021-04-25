@@ -14,13 +14,10 @@
         <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
         <script type="text/javascript" src="{% static 'js/xadmin.js' %}"></script>
     </head>
-    
     <body>
     {% csrf_token %}
         <div class="x-nav">
             <span class="layui-breadcrumb">
-{#                <a href="">订单列表</a>#}
-{#                <a href="">演示</a>#}
                 <a>
                     <cite>分组列表</cite></a>
             </span>
@@ -33,27 +30,8 @@
                 <div class="layui-col-md12">
                     <div class="layui-card">
                         <div class="layui-card-body ">
-                            {% comment %}<form class="layui-form layui-col-space5" method="get">
-                                {% csrf_token %}
-                                <div class="layui-input-inline layui-show-xs-block">
-                                    <select name="con_level">
-                                        <option value="">竞赛筛选</option>
-
-                                        <option value="1" {% if filt.con_level == '1' %}selected{% endif %}>国家级</option>
-                                    </select>
-                                </div>
-
-                                <div class="layui-input-inline layui-show-xs-block">
-                                    <input type="text" name="con_id" placeholder="请输入竞赛编号" autocomplete="off" class="layui-input" value="{{ filt.con_id }}"></div>
-                                <div class="layui-input-inline layui-show-xs-block">
-                                    <button class="layui-btn" lay-submit="" lay-filter="sreach">
-                                        <i class="layui-icon">&#xe615;</i></button>
-                                </div>
-                            </form>{% endcomment %}
                         </div>
                         <div class="layui-card-header">
-                            {% comment %}<button class="layui-btn layui-btn-danger" onclick="delAll()">
-                                <i class="layui-icon"></i>批量删除</button>{% endcomment %}
                             <button class="layui-btn" onclick="xadmin.open('添加分组','/contest/group/add',500,250)">
                                 <i class="layui-icon"></i>添加</button></div>
                         <div class="layui-card-body ">
@@ -78,8 +56,6 @@
                                                 <i class="layui-icon">&#xe63c;</i></a>
                                             <a title="删除" onclick="member_del(this,'{{ group.group_id }}')" href="javascript:;">
                                                 <i class="layui-icon">&#xe640;</i></a>
-{#                                            <a title="查看" onclick="show_contest('{{ con.con_id }}')" href="javascript:;">#}
-{#                                                 <i class="layui-icon">&#xe649;</i></a>#}
                                         </td>
                                     </tr>
                                     {%empty%}
@@ -128,39 +104,7 @@
             window.top.location.reload()
         }
 
-
-        /*用户-停用
-        function member_stop(obj, id) {
-            layer.confirm('确认要停用吗？',
-            function(index) {
-
-                if ($(obj).attr('title') == '启用') {
-
-                    //发异步把用户状态进行更改
-                    $(obj).attr('title', '停用');
-                    $(obj).find('i').html('&#xe62f;');
-
-                    $(obj).parents("tr").find(".td-status").find('span').addClass('layui-btn-disabled').html('已停用');
-                    layer.msg('已停用!', {
-                        icon: 5,
-                        time: 1000
-                    });
-
-                } else {
-                    $(obj).attr('title', '启用');
-                    $(obj).find('i').html('&#xe601;');
-
-                    $(obj).parents("tr").find(".td-status").find('span').removeClass('layui-btn-disabled').html('已启用');
-                    layer.msg('已启用!', {
-                        icon: 5,
-                        time: 1000
-                    });
-                }
-
-            });
-        }
-        */
-        /*用户-删除*/
+        /*分组-删除*/
         function member_del(obj, gid) {
             layer.confirm('确认要删除吗？',
             function(index) {
@@ -181,11 +125,8 @@
 
             });
         }
-
         function delAll(argument) {
-
             var data = tableCheck.getData();
-
             layer.confirm('确认要删除吗？' + data,
             function(index) {
                 //捉到所有被选中的，发异步进行删除
@@ -195,7 +136,6 @@
                 $(".layui-form-checked").not('.header').parents('tr').remove();
             });
         }
-
         function autoRowSpan(){
             var row=0;
             var col = 1;
@@ -215,9 +155,5 @@
                 }
             }
         }
-
-
-
     </script>
-
 </html>

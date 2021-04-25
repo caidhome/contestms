@@ -29,16 +29,12 @@
                 <div class="layui-col-md12">
                     <div class="layui-card">
                         <div class="layui-card-header">
-{#                            <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量删除</button>#}
                             <button class="layui-btn" onclick="xadmin.open('添加证书','/cert/add','','',true)"><i class="layui-icon"></i>添加</button>
                         </div>
                         <div class="layui-card-body ">
                             <table class="layui-table layui-form">
                               <thead>
                                 <tr>
-                                  {% comment %}<th>
-                                    <input type="checkbox" name=""  lay-skin="primary">
-                                  </th>{% endcomment %}
                                   <th>ID</th>
                                   <th>模板</th>
                                   <th>名称</th>
@@ -47,9 +43,6 @@
                               <tbody>
                               {% for cert in res %}
                                 <tr>
-                                  {% comment %}<td>
-                                    <input type="checkbox" name="cert_id"  lay-skin="primary">
-                                  </td>{% endcomment %}
                                   <td>{{ cert.cert_id }}</td>
                                   <td><img style="height:70px;width:70px;line-height:50px!important;" src="/static{{ cert.cert_imgurl }}"></td>
                                     <td>{{ cert.cert_name }}</td>
@@ -98,18 +91,15 @@
       layui.use(['laydate','form'], function(){
         var laydate = layui.laydate;
         var form = layui.form;
-        
         //执行一个laydate实例
         laydate.render({
           elem: '#start' //指定元素
         });
-
         //执行一个laydate实例
         laydate.render({
           elem: '#end' //指定元素
         });
       });
-
        /*用户-重置密码*/
       function member_resetpwd(obj,id){
           layer.confirm('确认要重置密码吗？',function(index){
@@ -129,7 +119,6 @@
                     });
           });
       }
-
       /*用户-删除*/
       function member_del(obj,id){
           layer.confirm('确认要删除吗？',function(index){
@@ -154,13 +143,8 @@
 
           });
       }
-
-
-
       function delAll (argument) {
-
         var data = tableCheck.getData();
-  
         layer.confirm('确认要删除吗？'+data,function(index){
             //捉到所有被选中的，发异步进行删除
             layer.msg('删除成功', {icon: 1});

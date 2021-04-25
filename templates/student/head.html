@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="renderer" content="webkit">
     <meta name="baidu-site-verification" content="pmPdczRdjp"/>
-    <meta name="keywords" content="蓝桥杯大赛——全国大学生TMT行业赛事"/>
+    <meta name="keywords" content=""/>
     <meta name="description" content=""/>
     <title>兰州理工大学-天梯赛</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/basic.css' %}"/>
@@ -30,15 +30,6 @@
                 <li class="link" style="width: 130px; text-align: center;">
                     <a href="#">我的信息</a>
                 </li>
-
-                <!--
-                <li class="link">
-                    <a target="_blank"
-                       href="https://www.lanqiao.cn/questions/?topic_id=20&amp;pft=1&amp;sub_topic_id=21">交流讨论
-                        <span class="beizt"></span>
-                    </a>
-                </li>
-                <li class="link"><a href="/pages/dasai/tell_ours.html">联系我们</a></li> -->
             </ul>
         </div>
         <div class="right-wrap">
@@ -46,12 +37,6 @@
 
                 <li class="user" id="login_logined" style="">
                     <div class="head">
-{#                        <div class="bell-wrap">#}
-{#                            <a href="/pages/account/message.html">#}
-{#                                <img class="bell" src="https://static.lanqiao.cn/dasai/images/20200706/bell.png">#}
-{#                                <span class="num" id="newsNum" style="display:none;">0</span>#}
-{#                            </a>#}
-{#                        </div>#}
                         <div class="user-info">
                             {% if request.session.login_user %}
                             <img class="photo" src="/static{{ request.session.login_user.stu_avator }}">

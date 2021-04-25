@@ -7,7 +7,6 @@
     <script src="{% static 'lib/layui/layui.js' %}"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'lib/layui/css/layui.css' %}">
-
         <style>
         .c_time_1 li, .c_time_2 li {
             display: inline-block;
@@ -18,34 +17,28 @@
             margin-left: 6%;
             margin-right: 9.5%;
         }
-
         .c_time_2 li {
             color: #7b838d;
             margin-left: 0;
             margin-right: 4%;
             line-height: 50px;
         }
-
         .c_time_2 li:nth-child(2) {
             margin-right: 2%;
         }
-
         .c_time_2 li:last-child {
             margin-right: 0;
         }
-
         #steps {
             padding: 1px 151px;
             background: #fff;
         }
-
         .step-item {
             display: inline-block;
             line-height: 26px;
             position: relative;
             background: #ffffff;
         }
-
         .step-item-tail {
             width: 100%;
             padding: 0 10px;
@@ -53,7 +46,6 @@
             left: 0;
             top: 13px;
         }
-
         .step-item-tail i {
             display: inline-block;
             width: 100%;
@@ -65,7 +57,6 @@
         .step-item-tail-done {
             background: #009688 !important;
         }
-
         .step-item-head {
             position: relative;
             display: inline-block;
@@ -78,18 +69,15 @@
             border-radius: 50%;
             background: #ffffff;
         }
-
         .step-item-head.step-item-head-active {
             background: #009688;
             color: #ffffff;
         }
-
         .step-item-main {
             background: #ffffff;
             display: block;
             position: relative;
         }
-
         .step-item-main-title {
             font-weight: bolder;
             color: #555555;
@@ -105,16 +93,11 @@
     <div class="innertop">
         <div class="line">
             <div class="tleft tcolor1"><img src="{% static 'images/stu/bg_detial.jpeg' %}" width="489" height="276">
-                {% comment %}<span><a href="http://www.ncccu.org.cn/case1.html#cs">报名缴费</a></span>{% endcomment %}
             </div>
             <div class="tright">
                 <div class="ititle">赛题：{{ con.con_name }}</div>
                 <div class="ititle2">
                     <br><br><br>
-{#                    <span>组织架构</span><br>#}
-{#                    主办单位：全国高等学校计算机教育研究会<br>#}
-{#                    承办单位：我爱竞赛网、各高校计算机相关院系<br>#}
-{#                    技术支持：兰智大数据、《软件导刊》杂志社#}
                 </div>
                 <div class="ctime">
                     <ul class="c_time_1">
@@ -131,13 +114,8 @@
                 </div>
             </div>
             <div class="clear"></div>
-
         </div>
-
-
     </div>
-
-
     <div id="steps"></div>
     <div id="content_1">
         <div style="margin-left: 122px; margin-top: 20px;">
@@ -224,7 +202,6 @@
                         </select>
                       </div>
                  </div>
-
                 <div class="layui-form-item">
                     <label class="layui-form-label">指导教师</label>
                     <div class="layui-input-inline">
@@ -235,9 +212,6 @@
                 <div class="layui-form-mid layui-word-aux" style="color: red !important;">注：除电话和邮箱外，如果其他信息有误，请及时联系管理员修改。</div>
                 </div>
             </div>
-
-
-
               <div class="layui-form-item">
                 <div class="layui-input-block">
                   <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" id="toTwo">确认提交</button>
@@ -247,13 +221,11 @@
     </div>
     </div>
 </div>
-
 </body>
 <script>
     layui.config({
         base: '{% static 'js/'%}'
     });
-
     layui.use(['form', 'steps'],  function () {
         var steps = layui.steps;
         var form = layui.form;
@@ -266,9 +238,7 @@
             {'title': "完成", "desc": "完成报名"}
             {#{'title': "第四步", "desc": "2018-07-01 10:44:42"}#}
             ];
-
         steps.make(data, '#steps', 0);
-
         //自定义验证规则
       form.verify({
             pass: [
@@ -283,10 +253,6 @@
           $.ajax({
                 url: '/user/stu_query_person',
                 data: {'user_id': $("input[name='stu_id']").val()
-                    {% comment %},
-                    'csrfmiddlewaretoken': function () {
-                    return $(':input:first').val()
-                }{% endcomment %}
                 },
                 dataType: "json",
                 type: "GET",
@@ -304,7 +270,6 @@
                         $('#stu_tel').html(result.stu.stu_tel)
                         $('#stu_major').html(result.stu.stu_major)
                         $('#avator').attr('src', '/static'+result.stu.stu_avator)
-
                     }
                     layer.msg(result.msg, {
                         icon: result.code
@@ -332,7 +297,6 @@
                                 window.top.location.reload()
                             }
                         });
-
                     },
                     error: function (result) {
                         layer.msg('服务器异常！', {
